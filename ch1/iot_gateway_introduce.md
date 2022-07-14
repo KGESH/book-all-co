@@ -6,10 +6,10 @@
 
 ### 개념
 
-- 이 챕터는 게이트웨이를 구현하는 방법을 알아본다
-- 게이트웨이는 H/W Layer에서 H/W Layer <-> Server Layer 간의 통신을 담당한다
-- 게이트웨이와 MQTT 브로커간의 통신 프로토콜은 MQTT를 사용한다
-- 브로커의 입장에서는 IoT Gatway  
+- 이 챕터는 게이트웨이를 구현하는 방법을 알아봅니다.
+- 게이트웨이는 H/W Layer에서 H/W Layer <-> Server Layer 간의 통신을 담당합니다.
+- 게이트웨이와 MQTT 브로커 간의 통신 프로토콜은 MQTT를 사용합니다.
+- MQTT 브로커의 입장에서는 IoT Gatway는 MQTT Client입니다.
 
 
 아래 구현방법 선택필요
