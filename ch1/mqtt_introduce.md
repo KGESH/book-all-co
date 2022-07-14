@@ -9,7 +9,7 @@ TCP / IP 위에서 동작하며, IoT와 같은 네트워크 대역폭이 제한�
 ## 개념
 
 
-![](./book_mqtt_flow.png)
+![](resources/book_mqtt_flow.png)
 
 
 - MQTT Broker

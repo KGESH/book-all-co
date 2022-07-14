@@ -1,6 +1,6 @@
 ## 시스템 구성도
 
-![](iot_system_layer.png)
+![](resources/iot_system_layer.png)
 
 예시 IoT 시스템에서는 그림과 같은 3개의 Layer를 나누어 개발한다
 
