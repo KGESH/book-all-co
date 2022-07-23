@@ -2,7 +2,7 @@
 
 ## H/W Layer Design 
 
-![](resources/book_iot_gateway.png)
+![](../resources/book_iot_gateway.png)
 
 ### 개념
 
