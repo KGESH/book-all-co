@@ -1,0 +1,141 @@
+{
+  "main": {
+    "id": "361b630d9525f611",
+    "type": "split",
+    "children": [
+      {
+        "id": "798b94d2f18a57d6",
+        "type": "leaf",
+        "state": {
+          "type": "markdown",
+          "state": {
+            "file": "ch1/3_mqtt_practice.md",
+            "mode": "source",
+            "source": false
+          }
+        }
+      }
+    ],
+    "direction": "vertical"
+  },
+  "left": {
+    "id": "c09c707b2f948dab",
+    "type": "split",
+    "children": [
+      {
+        "id": "38fa9be085e54210",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "46272189529413d3",
+            "type": "leaf",
+            "state": {
+              "type": "file-explorer",
+              "state": {}
+            }
+          },
+          {
+            "id": "e33b3eb80105fdbc",
+            "type": "leaf",
+            "state": {
+              "type": "search",
+              "state": {
+                "query": "",
+                "matchingCase": false,
+                "explainSearch": false,
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical"
+              }
+            }
+          },
+          {
+            "id": "d451a4fe952342e4",
+            "type": "leaf",
+            "state": {
+              "type": "starred",
+              "state": {}
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300
+  },
+  "right": {
+    "id": "f081b6795d3924bb",
+    "type": "split",
+    "children": [
+      {
+        "id": "ec2c918504c9ef0e",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "996c40b30ebe6c30",
+            "type": "leaf",
+            "state": {
+              "type": "backlink",
+              "state": {
+                "file": "ch1/3_mqtt_practice.md",
+                "collapseAll": false,
+                "extraContext": false,
+                "sortOrder": "alphabetical",
+                "showSearch": false,
+                "searchQuery": "",
+                "backlinkCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "8a0083bc99ca8d52",
+            "type": "leaf",
+            "state": {
+              "type": "outgoing-link",
+              "state": {
+                "file": "ch1/3_mqtt_practice.md",
+                "linksCollapsed": false,
+                "unlinkedCollapsed": true
+              }
+            }
+          },
+          {
+            "id": "6b89d5a569e41ffd",
+            "type": "leaf",
+            "state": {
+              "type": "tag",
+              "state": {
+                "sortOrder": "frequency",
+                "useHierarchy": true
+              }
+            }
+          },
+          {
+            "id": "ab8f61406a6d871c",
+            "type": "leaf",
+            "state": {
+              "type": "outline",
+              "state": {
+                "file": "ch1/3_mqtt_practice.md"
+              }
+            }
+          }
+        ]
+      }
+    ],
+    "direction": "horizontal",
+    "width": 300,
+    "collapsed": true
+  },
+  "active": "798b94d2f18a57d6",
+  "lastOpenFiles": [
+    "ch1/2_mqtt_introduce.md",
+    "ch1/6_broker_setup.md",
+    "ch1/5_docker_setup.md",
+    "ch1/4_aws_setup.md",
+    "ch1/3_mqtt_practice.md",
+    "ch1/1_system_ introduce.md",
+    "README.md"
+  ]
+}

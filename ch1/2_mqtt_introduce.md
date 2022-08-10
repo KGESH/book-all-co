@@ -3,9 +3,7 @@
 MQTT는 Message Queuing Telemetry Transport의 약자로 Publish / Subscribe (발행, 구독) 기반의 경량 메시징 프로토콜입니다. TCP / IP 위에서 동작하며, IoT와 같은 네트워크 대역폭이 제한되거나 대규모 트래픽을 위한 통신 프로토콜입니다.
 
 ## 개념
-
-![](../resources/book_mqtt_flow.png)
-
+![[resources/ch1/2/1.png]]
 ### MQTT Broker
 MQTT 시스템에서의 서버 역할입니다. MQTT Client가 발행한 메시지를 구독자들에게 전송합니다.
 

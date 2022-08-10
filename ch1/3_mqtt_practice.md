@@ -44,11 +44,13 @@ sudo systemctl status mosquitto.service
 ```
 mosquitto_sub -h localhost -p 1883 -t company/floor2/toilet
 ```
+![[resources/ch1/3/1.png]]
 
 ### Publish (발행)
 ```
 mosquitto_pub -h localhost -p 1883 -t company/floor2/toilet -m "hello"
 ```
+![[resources/ch1/3/2.png]]
 
 mosquitto client 옵션
 - -h: MQTT 브로커의 IP 주소입니다. 우리는 로컬 환경에서 브로커와 클라이언트를 실행할 것이므로 로컬호스트로 설정합니다.
@@ -59,6 +61,7 @@ mosquitto client 옵션
 
 축하합니다. 다음과 같이 성공적으로 구독자가 브로커를 통해 발행자의 메시지를 수신했습니다. 앞서 설명했듯이 하나의 토픽을 여러 클라이언트들이 구독할 수 있습니다. 여러 개의 구독자 클라이언트를 실행하고 토픽을 구독해 보세요. 하나의 발행자가 토픽을 발행하면 모든 구독자들이 메시지를 수신합니다.
 
-### 결과 이미지
+### 결과 이미지(...수정 예정)
 (... MQTT Client 이미지)
 (... 주의사항 기재 - 루트 토픽 '/'로 시작하지 않기)
+![[resources/ch1/3/3.png]]
