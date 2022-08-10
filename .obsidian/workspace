@@ -4,7 +4,7 @@
     "type": "split",
     "children": [
       {
-        "id": "798b94d2f18a57d6",
+        "id": "0ccabd945273e003",
         "type": "leaf",
         "state": {
           "type": "markdown",
@@ -128,17 +128,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "798b94d2f18a57d6",
+  "active": "0ccabd945273e003",
   "lastOpenFiles": [
+    "ch1/3_mqtt_practice.md",
+    "ch1/2_mqtt_introduce.md",
+    "ch1/1_system_ introduce.md",
+    "resources/ch1/4/12_1 1.png.md",
     "ch3/server-layer/2_server_introduce.md",
     "ch3/server-layer/1_server_layer.md",
     "ch2/hw-layer/3_iot_gateway_describe.md",
     "ch2/hw-layer/2_iot_gateway_introduce.md",
     "ch2/hw-layer/1_hw_layer.md",
-    "ch1/6_broker_setup.md",
-    "ch1/5_docker_setup.md",
-    "ch1/4_aws_setup.md",
-    "ch1/3_mqtt_practice.md",
-    "ch1/2_mqtt_introduce.md"
+    "ch1/6_broker_setup.md"
   ]
 }
