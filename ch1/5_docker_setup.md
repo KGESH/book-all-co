@@ -6,7 +6,7 @@ EC2에 직접 MQTT 브로커와 웹 애플리케이션을 설치하고 실행할
 
 
 ### 오래된 버전 삭제
-만약 이전 버전의 도커가 설치되어 있다면 제거합니다.
+만약 이전 버전의 도커가 설치되어 있다면 제거합니다. (... 문제 없다고 설명 추가 예정)
 ```
 sudo apt-get remove docker docker-engine docker.io containerd runc
 ```

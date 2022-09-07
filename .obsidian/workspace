@@ -4,15 +4,11 @@
     "type": "split",
     "children": [
       {
-        "id": "3cc47701565b00c4",
+        "id": "5a30b1ade7b0f210",
         "type": "leaf",
         "state": {
-          "type": "markdown",
-          "state": {
-            "file": "ch1/5_docker_setup.md",
-            "mode": "source",
-            "source": false
-          }
+          "type": "empty",
+          "state": {}
         }
       }
     ],
@@ -29,9 +25,11 @@
           {
             "id": "46272189529413d3",
             "type": "leaf",
+            "pinned": true,
             "state": {
               "type": "file-explorer",
-              "state": {}
+              "state": {},
+              "pinned": true
             }
           },
           {
@@ -43,7 +41,7 @@
                 "query": "",
                 "matchingCase": false,
                 "explainSearch": false,
-                "collapseAll": false,
+                "collapseAll": true,
                 "extraContext": false,
                 "sortOrder": "alphabetical"
               }
@@ -77,7 +75,6 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "ch1/5_docker_setup.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -94,7 +91,6 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "ch1/5_docker_setup.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -116,9 +112,7 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {
-                "file": "ch1/5_docker_setup.md"
-              }
+              "state": {}
             }
           }
         ]
@@ -128,17 +122,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "3cc47701565b00c4",
+  "active": "5a30b1ade7b0f210",
   "lastOpenFiles": [
-    "ch1/6_broker_setup.md",
-    "ch1/5_docker_setup.md",
-    "ch1/4_aws_setup.md",
-    "ch1/1_system_ introduce.md",
-    "ch1/3_mqtt_practice.md",
-    "ch1/2_mqtt_introduce.md",
-    "ch2/hw-layer/2_iot_gateway_introduce.md",
-    "ch2/hw-layer/1_hw_layer.md",
-    "ch3/server-layer/2_server_introduce.md",
-    "ch3/server-layer/1_server_layer.md"
+    "swagger_gete.png.md",
+    "swagger_get.png.md",
+    "ch2/server-layer/8_monitoring_project_api.md",
+    "ch2/server-layer/6_nestjs_tutorial.md",
+    "ch2/server-layer/7_hello_nestjs.md",
+    "ch2/server-layer/1_server_layer.md",
+    "ch2/server-layer/4_nestjs_introduce.md",
+    "resources/ch2/8/sensor_di_error.png",
+    "resources/ch2/8/swagger_get_5.png",
+    "resources/ch2/8/swagger_get_4.png"
   ]
 }
