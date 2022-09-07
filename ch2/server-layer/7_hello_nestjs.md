@@ -1,9 +1,10 @@
 # NestJS 둘러보기
-앞서 생성한 first-app 프로젝트를 자기가 사용하는 코드 편집기로 열어서 프로젝트의 구조를 확인해봅니다.  대표적으로 Microsoft의 Visual Studio Code(vs code)와 JetBrains의 Web Storm 등이 있습니다. 자신에게 편한 개발환경을 선택하면 됩니다. 이 책에서는 Web Storm을 사용하여 진행하겠습니다.
+앞서 생성한 first-app 프로젝트를 자신이 사용하는 코드 편집기로 열어서 프로젝트의 구조를 확인해봅니다.  대표적으로 Microsoft의 Visual Studio Code(vs code)와 JetBrains의 Web Storm 등이 있습니다. 자신에게 편한 개발환경을 선택하면 됩니다. 이 책에서는 Web Storm을 사용하여 진행하겠습니다.
 
 ## 첫 프로젝트 구조
-처음 프로젝트 생성 시 프로젝트의 구조는 다음 그림과 같습니다.
+처음 프로젝트 생성 시 프로젝트의 구조는 [그림 x.x : 첫 프로젝트 구조]과 같습니다.
 ![[tree.png]]
+[그림 x.x : 첫 프로젝트 구조]
 
 프로젝트 src 디렉토리의 main.ts 파일을 확인해봅시다.
 src/main.ts
@@ -29,6 +30,7 @@ bootstrap();
 
 
 ![[nestjs_controller.png]]
+[그림 : 공식 문서 컨트롤러 설명]
 
 공식 문서의 설명만 보면 무슨말인지 모르겠네요. 우리 프로젝트의 컨트롤러 코드를 보며 얘기해 봅시다.
 
@@ -60,11 +62,13 @@ npm run start:dev
 
 웹 브라우저에서 주소창에 http://localhost:3000 으로 접속해봅시다. 정상적으로 접속이 되었다면 "Hello, World!" 라는 문자열을 볼 수 있습니다. 
 이처럼 @Get() 데코레이터가 root('/' 가 생략)로 들어오는 요청을 처리한다는 것을 확인했습니다.
-이번에는 http://localhost:3000/hello url로 접속해봅시다.  404 HTTP StatusCode(상태 코드)와 함께 "/hello"를 찾을 수 없다는 메시지를 확인할 수 있습니다.
-(... 확장 프로그램 설명크롬 브라우저의 JSON Viewr라는 확장프로그램을 사용하면 다음과 같이 JSON 형식의 데이터를 보기 좋게 정렬해서 보여줍니다.
+이번에는 http://localhost:3000/hello url로 접속해봅시다.  [그림 : hello not found]과 같이 404 HTTP StatusCode(상태 코드)와 함께 "/hello"를 찾을 수 없다는 메시지를 확인할 수 있습니다.
+(... 확장 프로그램 설명크롬 브라우저의 JSON Viewr라는 확장프로그램을 사용하면 JSON 형식의 데이터를 보기 좋게 정렬해서 보여줍니다.
 이는 크롬 웹 스토어에서 검색하여 쉽게 설치할 수 있습니다.)
 
 ![[hello_notfound.png]]
+[그림 : hello not found]
+
 
 다시 코드로 돌아와서 @Get() 데코레이터를 @Get('hello')로 수정합니다. 
 src/app.controller.ts
@@ -75,8 +79,9 @@ getHello(): string {
 }
 ```
 
-변경서항을 저장하고 서버가 재시작되면 웹 브라우저 주소창에 http://localhost:3000/hello url로 접속합니다. 처음 http://localhost:3000 에 접속했을때 만난 페이지를 확인할 수 있습니다. 이번에는 다시 웹 브라우저 주소창에 http://localhost:3000 에 접속해봅시다. 아마 예상했듯이 "/" 를 찾을 수 없다는 메시지를 확인할 수 있습니다.
+변경서항을 저장하고 서버가 재시작되면 웹 브라우저 주소창에 http://localhost:3000/hello url로 접속합니다. 처음 http://localhost:3000 에 접속했을때 만난 페이지를 확인할 수 있습니다. 이번에는 다시 웹 브라우저 주소창에 http://localhost:3000 에 접속해봅시다. 아마 예상했듯이 [그림 : root not found] 처럼 "/" 를 찾을 수 없다는 메시지를 확인할 수 있습니다.
 ![[root_notfound.png]]
+[그림 : root not found]
 
 이처럼 NestJS 애플리케이션은 데코레이터를 사용해 라우팅(routing)을 구현합니다. 기본적으로 Get() 데코레이터에 아무 값도 주지 않으면 디폴트 값으로 '/' (루트) 경로로 라우팅하여 사용자의 요청을 처리합니다.
 
@@ -99,6 +104,7 @@ export class AppController {
 
 이는 라우팅 경로의 prefix를 설정한 것이며 해당 컨트롤러 클래스 내부의 요청들은 http://localhost:3000/app/hello 처럼 prefix를 포함한 경로로 접근 가능합니다.
 ![[app_hello.png]]
+[그림 : prefix app hello]
 
 NestJS에서 url에 접근할 때 사용되는 것은 오직 데코레이터에 전달된 라우트 경로를 나타내는 문자열입니다. 클래스나 메소드의 이름은 개발자가 마음대로 지정할 수 있습니다. 메소드의 이름을 getHello가 아닌 getHelloMessage() 라고 수정해도 우리가 원하는대로 작동합니다.
 
@@ -146,12 +152,13 @@ export class AppService {
 }
 ```
 
-코드를 저장하고 http://localhost:3000/app/hello 로 접속해보면 다음과 같이 다른 응답을 확인할 수 있습니다.
+코드를 저장하고 http://localhost:3000/app/hello 로 접속해보면 [그림 : hello IoT] 같이 다른 응답을 확인할 수 있습니다.
 
 ![[hello_iot.png]]
+[그림 : hello IoT]
 
 
-이처럼 계층을 나누는 일은 중요합니다. 웹 브라우저(클라이언트)와 통신하는 역할(책임)은 컨트롤러에게 맡기고 서비스는 오직 자신의 비지니스 로직만 수행합니다. 이러한 구조는 프로젝트의 규모가 커질수록 유지보수와 확장하기 쉽게 만들어줍니다. 이 책에서는 다루지 않지만 객체지향의 5가지 설계원칙 SOLID를 따로 찾아보는것을 추천합니다.(...SOLID 간략 설명)
+이처럼 계층을 나누는 일은 중요합니다. 웹 브라우저(클라이언트)와 통신하는 역할(책임)은 컨트롤러에게 맡기고 서비스는 오직 자신의 비지니스 로직만 수행합니다. 이러한 구조는 프로젝트의 규모가 커질수록 유지보수와 확장하기 쉽게 만들어줍니다. 이 책에서는 다루지 않지만 객체지향의 5가지 설계원칙 SOLID를 따로 찾아보는것을 추천합니다.(... 알나지 SOLID 간략 설명)
 
 
 ## 라우팅
@@ -180,6 +187,7 @@ export class AppController {
 ```
 
 ![[route_param.png]]
+[그림 : 라우트 파라미터]
 
 라우트 파라미터를 다룰때는 항상 순서에 주의해야합니다. 예를들어 localhost:3000/app/user/hello로 요청했을때 다음과 같은 컨트롤러는 어떤 응답을 줄까요? getHello메소드의 @Get 데코레이터를 다음과 같이 수정하고 getUser 메소드가 먼저 정의되게 코드를 작성합니다.
 
@@ -202,6 +210,7 @@ export class AppController {
 ```
 
 ![[route_param_wrong.png]]
+[그림 : 라우트 파라미터 잘못된 예]
 
 user/hello 라우팅 요청이 작동되길 기대했지만 user/:id 라우팅 요청이 작동한 것을 확인할 수 있습니다. 이처럼 라우트 파라미터를 사용할 때는 컨트롤러의 메소드 정의 순서에 주의해야합니다. 먼저 정의된 @Get('user/:id') 데코레이터가 user/hello URL에서 hello를 id로 인식해서 생긴 문제입니다. 다음과 같이 메소드 순서를 바꿔 실행해보겠습니다.
 
@@ -224,6 +233,7 @@ export class AppController {
 ```
 
 ![[route_param_correct.png]]
+[그림 : 라우트 파라미터 옳은 예]
 
 
 이제 우리가 원하는 대로 작동하는 것을 확인할 수 있습니다. 

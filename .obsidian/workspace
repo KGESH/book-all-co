@@ -7,8 +7,12 @@
         "id": "5a30b1ade7b0f210",
         "type": "leaf",
         "state": {
-          "type": "empty",
-          "state": {}
+          "type": "markdown",
+          "state": {
+            "file": "ch2/server-layer/7_hello_nestjs.md",
+            "mode": "source",
+            "source": false
+          }
         }
       }
     ],
@@ -75,6 +79,7 @@
             "state": {
               "type": "backlink",
               "state": {
+                "file": "ch2/server-layer/7_hello_nestjs.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -91,6 +96,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
+                "file": "ch2/server-layer/7_hello_nestjs.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -112,7 +118,9 @@
             "type": "leaf",
             "state": {
               "type": "outline",
-              "state": {}
+              "state": {
+                "file": "ch2/server-layer/7_hello_nestjs.md"
+              }
             }
           }
         ]
@@ -124,15 +132,15 @@
   },
   "active": "5a30b1ade7b0f210",
   "lastOpenFiles": [
+    "ch2/server-layer/6_nestjs_tutorial.md",
+    "ch2/server-layer/5_nestjs_setup.md",
+    "ch2/server-layer/4_nestjs_introduce.md",
+    "ch2/server-layer/3_tech_required.md",
+    "ch2/server-layer/2_server_introduce.md",
+    "ch2/server-layer/1_server_layer.md",
+    "ch2/server-layer/8_monitoring_project_api.md",
     "swagger_gete.png.md",
     "swagger_get.png.md",
-    "ch2/server-layer/8_monitoring_project_api.md",
-    "ch2/server-layer/6_nestjs_tutorial.md",
-    "ch2/server-layer/7_hello_nestjs.md",
-    "ch2/server-layer/1_server_layer.md",
-    "ch2/server-layer/4_nestjs_introduce.md",
-    "resources/ch2/8/sensor_di_error.png",
-    "resources/ch2/8/swagger_get_5.png",
-    "resources/ch2/8/swagger_get_4.png"
+    "ch2/server-layer/7_hello_nestjs.md"
   ]
 }
