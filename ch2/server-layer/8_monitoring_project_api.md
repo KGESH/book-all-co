@@ -35,37 +35,39 @@ nest new iot-monitoring
 ```
 
 패키지 매니저는 npm으로 선택합니다.
-![[nest_new.png]]
-
+![[nest_monitoring_new.png]]
+[그림 : Nest 모니터링 프로젝트 초기 설정]
 초기 설정이 완료되면 본인의 코드 편집기를 열어 다음 명령어로 서버를 실행합니다. 이전 예제 프로젝트와 같은 3000번 포트를 사용하니까 이전 예제 서버가 작동중이라면 이전 예제 서버를 종료하고 서버를 실행합니다.
 
 ![[nest_setup_done.png]]
-
+[그림 : Nest 모니터링 앱 실행]
 ```
 npm run start:dev
 ```
 
-http://localhost:3000 에 접속해서 Hello World! 페이지가 성공적으로 접속되는지 확인합니다.
+http://localhost:3000 에 접속해서 [그림 : Nest 모니터링 앱 접속 성공] 같이 Hello World! 페이지가 성공적으로 접속되는지 확인합니다.
 
 ![[nest_hello.png]]
 
 
 ## Resources
-우리가 정의할 API는 REST API 입니다. (... REST API 설명) 터미널에 다음과 같이 NestJS의 CLI 명령어를 입력합니다.
+우리가 정의할 API는 REST API 입니다. (... REST API 설명) 터미널에 [그림 : Nest 모니터링 앱 리소스 생성] 같이 NestJS의 CLI 명령어를 입력합니다.
 
 ```
 nest generate resource sensors
 ```
 
 ![[nest_g_sensors_1.png]]
+[그림 : Nest 모니터링 앱 리소스 생성1]
 
-REST API를 선택하고 CRUD 엔트리 포인트를 생성하겠냐는 질문에 Y를 입력합니다. 디폴트가 Yes이므로 엔터를 눌러 진행합니다.
+[그림 : Nest 모니터링 앱 리소스 생성2] 같이 REST API를 선택하고 CRUD 엔트리 포인트를 생성하겠냐는 질문에 Y를 입력합니다. 디폴트가 Yes이므로 엔터를 눌러 진행합니다.
 
 ![[nest_g_sensors_3.png]]
+[그림 : Nest 모니터링 앱 리소스 생성2] 
 
 컨트롤러, 서비스 등의 코드들을 직접 생성해도 되지만, 이처럼 CLI를 사용하여 보일러 플레이트 코드들을 쉽게 생성할 수 있습니다.
 
-보일러 플레이트 코드가 생성된 이후 디렉토리 구조입니다.
+[그림 : Nest 모니터링 앱 구조] 는 보일러 플레이트 코드가 생성된 이후 디렉토리 구조입니다.
 
 ![[tree_sensors.png]]
 
@@ -112,9 +114,10 @@ export class SensorsController {
 }
 ```
 
-다음과 같이 http://localhost:3000/sensors 
+[그림 : sensors GET] 같이 http://localhost:3000/sensors 
 http://localhost:3000/sensors/100 들에 접속하여 Get 요청들이 잘 작동하는지 확인해봅니다.
 ![[get_sensors.png]]
+[그림 : sensors GET]
 
 
 ![[get_sensors_id.png]]
@@ -154,24 +157,28 @@ async function bootstrap() {
 bootstrap();
 ```
 
-http://localhost:3000/api-docs 에 접속하여 다음과 같이 API 문서가 생성되었는지 확인합니다.
+http://localhost:3000/api-docs 에 접속하여 API 문서가 생성되었는지 확인합니다.
   
 
 
-이곳에서 우리가 작성한 API를 확인할 수 있습니다. 다음과 같이 sensors 엔드포인트에 GET 요청을 보내봅시다.
+이곳에서 우리가 작성한 API를 확인할 수 있습니다. [그림 : swagger GET 1], [그림 : swagger GET 2], [그림 : swagger GET 3] 과 같이 sensors 엔드포인트에 GET 요청을 보내봅시다.
 
 
 
 
 ![[swagger_get_2.png]]
+[그림 : swagger GET 1]
 
 ![[swagger_get_3.png]]
+[그림 : swagger GET 2]
 
 ![[swagger_get_4.png]]
+[그림 : swagger GET 3]
 
-GET 요청에 대한 응답 결과로 다음과 같은 결과를 얻었습니다. 이처럼 스웨거에서 우리가 제작한 API를 테스트해볼 수 있습니다. 또한 이렇게 API를 문서화하면 요청에 어떤 파라미터들이 필요하고 어떤 응답이 돌아오는지 알 수 있으므로 다른 개발자와의 협업에 큰 도움이 됩니다.
+GET 요청에 대한 응답 결과로 [그림 : swagger GET 4]과 같은 결과를 얻었습니다. 이처럼 스웨거에서 우리가 제작한 API를 테스트해볼 수 있습니다. 또한 이렇게 API를 문서화하면 요청에 어떤 파라미터들이 필요하고 어떤 응답이 돌아오는지 알 수 있으므로 다른 개발자와의 협업에 큰 도움이 됩니다.
 
 ![[swagger_get_5.png]]
+[그림 : swagger GET 4]
 
 
 ## DTO (Data transfer object)
@@ -280,7 +287,7 @@ export class SensorsService {
 
 현재 서비스 코드는 아주 단순합니다. 컨트롤러에게 전달 받은 센서 생성에 필요한 DTO를 리파지토리에 전달하여 '데이터베이스 저장'이라는 책임을 리파지토리에 위임합니다. 리파지토리에서 저장한 결과를 콘솔로 출력하고 그대로 컨트롤러에게 반환합니다. 앞으로 여러 요구사항들이 추가되면 서비스 코드는 더 길어질 것입니다. 서비스가 점점 커지게된다면 하나의 서비스가 너무 많은 책임을 가진게 아닌지 생각해보고 분할할 수 있다면 분할해야합니다.
 
-센서 생성(Create), 조회(Read) 서비스를 작성했으니 이를 사용하여 다음과 같이 센서 컨트롤러를 작성합니다. 비지니스 로직과 데이터베이스 접근이라는 관심사를 분리했기 때문에 매우 간결한 코드로 우리가 원하는 요구사항들을 구현했습니다. 컨트롤러 작성을 마치고 서버를 실행해보면 서버가 실행되지 않으며 아마 다음과 같거나 비슷한 오류가 발생합니다.
+센서 생성(Create), 조회(Read) 서비스를 작성했으니 이를 사용하여 다음과 같이 센서 컨트롤러를 작성합니다. 비지니스 로직과 데이터베이스 접근이라는 관심사를 분리했기 때문에 매우 간결한 코드로 우리가 원하는 요구사항들을 구현했습니다. 컨트롤러 작성을 마치고 서버를 실행해보면 서버가 실행되지 않으며 [그림 : 센서 리파지토리 에러] 같은 오류가 발생합니다.
 src/sensors/sensors.controller.ts
 ```
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';  
@@ -308,21 +315,44 @@ export class SensorsController {
 }
 ```
 
-다음과 같이 센서 서비스에서 센서 리파지토리를 사용할 수 없다는 에러가 발생합니다. 에러 메시지를 잘 읽어보면 센서 모듈(SensorsModule)에서 리파지토리를 사용할 수 있는지 확인하라고 알려줍니다. 또한 Nest가 제시한 해결방법을 살펴보면 센서 리파지토리가 Provider인 경우 센서 모듈의 일부인지 확인하라고 힌트를 줍니다. 여기서 나온 키워드들을 조합해보면 센서 리파지토리 클래스를 생성하고 사용하려면 센서 모듈에 등록에 등록해야한다. 라고 추측해볼 수 있습니다. 
+[그림 : 센서 리파지토리 에러] 같이 센서 서비스에서 센서 리파지토리를 사용할 수 없다는 에러가 발생합니다. 에러 메시지를 잘 읽어보면 센서 모듈(SensorsModule)에서 리파지토리를 사용할 수 있는지 확인하라고 알려줍니다. 또한 Nest가 제시한 해결방법을 살펴보면 센서 리파지토리가 Provider인 경우 센서 모듈의 일부인지 확인하라고 힌트를 줍니다. 여기서 나온 키워드들을 조합해보면 센서 리파지토리 클래스를 생성하고 사용하려면 센서 모듈에 등록에 등록해야한다. 라고 추측해볼 수 있습니다. 
 
-여태까지 우리는 별다른 과정 없이 센서 서비스를
 ![[sensor_di_error.png]]
+[그림 : 센서 리파지토리 에러]
 
 일단 Nest에서 제안하는 대로 센서 모듈을 살펴봅시다.
 
 src/sensors/sensors.module.ts
 ```
-센서 모듈 코드 작성 예정
+import { Module } from '@nestjs/common';  
+import { SensorsService } from './sensors.service';  
+import { SensorsController } from './sensors.controller';  
+  
+@Module({  
+  controllers: [SensorsController],  
+  providers: [SensorsService],  
+})  
+export class SensorsModule {}
 
 ```
 
-providers 배열에 센서 서비스가 등록 되어있는것을 확인할 수 있습니다. 센서 서비스 클래스위에 @Injectable() 데코레이터를 기억하시나요? 우리가 데이터 계층을 다룰때 사용하는 센서 리파지토리를 작성할때 까먹지말고 @Injectable() 데코레이터도 작성하라고 했습니다. @Injectable() 데코레이터는 해당 클래스를 Nest의 DI(dependency injection)컨테이너가 관리하는 주입(inject) 가능한 프로바이더(provider)로 만들어줍니다. 이 키워드들이 이해가 되지 않아도 괜찮습니다. 이후 provider를 설명할 때 같이 설명합니다. 일단 센서 리파지토리도 센서 서비스처럼 providers 배열에 등록하고 서버를 재실행 해보면 성공적으로 서버가 재실행 됩니다. 이제 우리는 @Injectable() 데코레이터를 붙인 클래스는 모듈의 프로바이더 배열에 등록하여 사용해야한다는 것을 배웠습니다.
+providers 배열에 센서 서비스가 등록 되어있는것을 확인할 수 있습니다. 센서 서비스 클래스위에 @Injectable() 데코레이터를 기억하시나요? 우리가 데이터 계층을 다룰때 사용하는 센서 리파지토리를 작성할때 까먹지말고 @Injectable() 데코레이터도 작성하라고 했습니다. @Injectable() 데코레이터는 해당 클래스를 Nest의 DI(dependency injection)컨테이너가 관리하는 주입(inject) 가능한 프로바이더(provider)로 만들어줍니다. 이 키워드들이 이해가 되지 않아도 괜찮습니다. 이후 provider를 설명할 때 같이 설명합니다. 다음 코드처럼 센서 리파지토리도 센서 서비스처럼 providers 배열에 등록하고 서버를 재실행 해보면 성공적으로 서버가 재실행 됩니다. 이제 우리는 @Injectable() 데코레이터가 붙은 클래스는 모듈의 프로바이더 배열에 등록하여 사용해야한다는 것을 배웠습니다.
 그렇다면 provider는 대체 무엇일까요?
+
+src/sensors/sensors.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { SensorsService } from './sensors.service';  
+import { SensorsController } from './sensors.controller';  
+import { SensorsRepository } from './sensors.repository';  
+  
+@Module({  
+  controllers: [SensorsController],  
+  /** 센서 리파지토리 등록 */  
+  providers: [SensorsService, SensorsRepository],  
+})  
+export class SensorsModule {}
+```
 
 ## Provider
 프로젝트 진행을 멈추고 지루한 내용들을 공부하느라 조금 힘들 수 있겠지만 이러한 개념들을 이해하고 개발하는 것과 단순히 프레임워크에서 시키는대로 하는 것은 생산성과 퀄리티에서 많은 차이가 납니다. 기본적인 내용들이 거의 끝나가니 조금만 더 힘내주세요.
@@ -331,7 +361,7 @@ providers 배열에 센서 서비스가 등록 되어있는것을 확인할 수 
 프로바이더(provider)는 Nest의 기본 개념입니다. 많은 기본 Nest 클래스는 서비스, 리파지토리, 팩토리, 헬퍼 등등의 프로바이더로 취급될 수 있습니다. 프로바이더의 주요 아이디어는 **의존성을 주입**할 수 있다는 점입니다. 이 뜻은 객체가 서로 다양한 관계를 만들 수 있다는 것을 의미합니다. 그리고 객체의 인스턴스를 연결해주는 기능은 Nest 런타입 시스템에 위임될 수 있습니다.
 
 ![[nest_provider.png]]
-그림 x.x  공식 문서에서 설명하는 컨트롤러와 프로바이더의 의존 관계
+[그림 : 공식 문서의 컨트롤러와 프로바이더의 의존 관계]
 
 
 NestJS 공식문서는 여러분들이 다음과 같은 개념들을 이해하고 있다고 가정하고 설명하기 때문에 한번에 이해가 되지 않을 수 있습니다. 따라서 하나씩 알아보고 다시 공식문서의 설명을 보겠습니다.
@@ -341,7 +371,7 @@ NestJS 공식문서는 여러분들이 다음과 같은 개념들을 이해하�
 
 
 ### 계층형 구조 (Layered Architecture)
-... 작성 예정
+계층형 구조 (Layered Architecture)는 n-tier architecture 라고도 불리며 
 
 
 ### 의존성 주입 (Dependency Injection)
@@ -432,7 +462,17 @@ const partyMember: Character[] = [archer, hunter];
 BossRaid(partyMember); /** Bow shot!, Dagger stab! */
 ```
 
-구체적 개념에 의존하지말고 추상적 개념에 의존하라는 말이 조금 와닿으셨나요? 그런데 만약 궁수의 2차 전직이 단검이 아니라 총을 쓰게 해달라고 요구사항이 변경되면 어떻게 해야할까요? (더이상 궁수가 아니라 총잡이가 되어버리지만) 일단 구현하려면 수백만줄의 코드 베이스에서 new Dagger()로 단검을 생성해 궁수에게 전달해주는 코드들을 전부 수정해야합니다. 이번에는 다른 코드에서 캐릭터의 현재 무기를 공유할수있게 만들어달라는 요구사항이 생겼습니다. 이때는 어떻게 해야할까요? 의존성 주입을 통해 궁수가 가진 무기가 무엇인지 몰라도 공격할수 있게 되었지만, 여전히 요구사항의 변경에 많은 코드를 수정해야합니다.
+
+구체적 개념에 의존하지말고 추상적 개념에 의존하라는 말이 조금 와닿으셨나요? 그런데 만약 궁수의 2차 전직이 단검 뿐만아니라 총도 쓰게 해달라고 요구사항이 변경되면 어떻게 해야할까요? (더이상 궁수가 아니게 되어버리지만) 일단 구현하려면 수백만줄의 코드 베이스에서 다음과 같이 단검과 총을 주입해주도록 수정 해야합니다.
+```
+const dagger = new Dagger();  
+const gun = new Gun();
+
+const hunter = new Archer(dagger, gun);  
+hunter.attack(); /** Dagger stab & Gun shot! */
+```
+
+의존성 주입을 통해 궁수가 가진 무기가 무엇인지 몰라도 공격할수 있게 되었지만, 여전히 요구사항의 변경에 많은 코드를 수정해야합니다.
 요구사항의 변경이 생길때마다 무기 클래스를 정의하고 일일이 new 연산으로 무기 인스턴스를 생성해서 전달하는게 최선일까요? 프로그램 규모가 커지고 복잡해질수록 요구사항들에 대응하기가 어려워집니다. 이 경우 제어의 역전을 사용합니다.
 
 
@@ -442,7 +482,7 @@ BossRaid(partyMember); /** Bow shot!, Dagger stab! */
 제어의 역전이라는 개념을 이해하기 위해서는 우선 의존성(dependency)이라는 개념을 알아야합니다. 우리는 이전 의존성 주입 챕터에서 활과 단검을 통해 의존성이 무엇인지 배웠습니다. 이제 제어의 역전을 통해 프로그래머가 수백만줄의 코드베이스에서 일일이 무기를 생성하지 않아도 되는 기적을 보겠습니다.
 
 
-다음은 제어의 역전을 이용해 궁수(총도 쏨) 캐릭터를 구현합니다. NestJS는 제어의 역전을 추상화하여 동작 확인이 어렵기 때문에 TypeDI를 사용해 예제를 구현합니다. 직접 실행은 하지 않아도 됩니다. 그냥 이런 느낌이구나~ 하고 이전 코드들과 다른점을 느끼고 넘어가면 됩니다. 만약 실행해보고 싶다면 TypeDI 공식 문서를 참조해 설치후 실행해봐도 괜찮습니다.
+다음은 제어의 역전을 이용해 궁수(총과 칼을 쏨) 캐릭터를 구현합니다. NestJS는 제어의 역전을 추상화하여 동작 확인이 어렵기 때문에 TypeDI를 사용해 예제를 구현합니다. 직접 실행은 하지 않아도 됩니다. 그냥 이런 느낌이구나~ 하고 이전 코드들과 다른점을 느끼고 넘어가면 됩니다. 만약 실행해보고 싶다면 TypeDI 공식 문서를 참조해 설치후 실행해봐도 괜찮습니다.
 
 ```
 import 'reflect-metadata';  
@@ -487,25 +527,79 @@ class Archer implements Character {
   }  
 }  
   
+  
 @Service()  
 class Hunter implements Character {  
-  /** 다시 단검으로 요구사항이 변경되면 무기의 타입만 수정하면 된다. */  
-  constructor(private readonly weapon: Gun) {}  
+  /** 요구사항이 변경되면 생성자에서 수정, 추가하면 된다. */  
+  constructor(private readonly dagger: Dagger, private readonly gun: Gun) {}  
   
   attack() {  
-    this.weapon.use();  
+    this.dagger.use();  
+    this.gun.use();  
   }  
 }  
-  
+
 const archer = Container.get(Archer);  
 const hunter = Container.get(Hunter);  
   
 archer.attack(); /** Bow shot! */  
-hunter.attack(); /** Gun shot! */
+hunter.attack(); /** Dagger stab & Gun shot! */
 ```
 
-코드 어디를 봐도 new 연산자가 없습니다. 덕분에 다시 단검을 사용하도록 요구사항이 변경되어도 수백만 라인의 코드베이스에서 단검을 생성하는 코드를 추가하지 않고 사냥꾼 클래스의 무기 타입만 단검으로 바꾸면 됩니다. 또한 다른 캐릭터에게 현재 사냥꾼이 사용하는 총을 쥐여주고 싶다면 컨테이너(Container)에 등록한 총을 꺼내오기만 하면 됩니다.
-그런데 어떻게 이런일이 가능한걸까요?
+코드 어디를 봐도 new 연산자가 없습니다. 덕분에 여러 무기를 사용하도록 요구사항이 변경되어도 수백만 라인의 코드베이스에서 무기를 생성하는 코드를 추가하지 않고 사냥꾼 클래스의 생성자 파라미터에 무기만 등록해주면 됩니다. 이제 컨테이너(Container)에서 궁수와 사냥꾼 인스턴스를 가져와 공격 메소드를 호출하면 우리가 기대한대로 캐릭터가 주입 받은 무기로 공격합니다. 어떻게 이런 일이 가능할까요?
+
+@Service() 데코레이터가 붙은 클래스는 TypeDI의 의존성  관리 시스템에 의해 **제어**됩니다. 이처럼 제어의 역전 (IoC, Inversion of Control)이라는 용어처럼 프로그래머가 직접 new 연산자로 인스턴스를 주입하는것이 아닌 **프레임 워크가** 의존 관계에 필요한 클래스를 생성해 주입해 줍니다.
+
+이제 센서 리파지토리를 생성하고 사용하려 했을때 발생한 문제를 추측할 수 있습니다. 센서 서비스에서 리파지토리를 사용하기 위해 Nest의 DI 컨테이너에서 센서 리파지토리가 주입되기를 원했지만, DI 컨테이너가 의존성을 관리하는 프로바이더(provider) 목록에 센서 리파지토리가 등록되지 않아서 생긴 문제입니다. Nest의 DI 시스템은 @Module 데코레이터에 등록한 providers 배열에서 필요한 클래스를 찾아 주입해줍니다. Nest의 세계에서 **제어**당할 클래스는 프로바이더 목록에 등록해야함을 잊지마세요!
+
+
+### 모듈(module) 
+
+Nest 애플리케이션은 [그림 : Nest 공식 문서 모듈 설명] 처럼 루트 모듈(application module)에서 여러 모듈들을 레고 블럭처럼 조립하여 애플리케이션을 구성합니다. 
+
+![[nest_module.png]]
+[그림 : Nest 공식 문서 모듈 설명]
+
+Nest CLI를 사용하여 Sensors 모듈을 생성했다면 다음과 같이 app.module.ts 파일의 imports 배열에 자동으로 센서 모듈이 등록되어 있는 것을 확인할 수 있습니다. 만약 CLI를 사용하지 않고 클래스를 생성했다면 모듈 파일에 등록해주는 작업이 필요합니다.
+
+src/app.module.ts 
+```
+import { Module } from '@nestjs/common';  
+import { AppController } from './app.controller';  
+import { AppService } from './app.service';  
+import { SensorsModule } from './sensors/sensors.module';  
+  
+@Module({  
+  imports: [SensorsModule],  
+  controllers: [AppController],  
+  providers: [AppService],  
+})  
+export class AppModule {}
+```
+
+@Module() 데코레이터는 다음과 같은 프로퍼티들을 가질 수 있습니다.
+- controllers : 현재 모듈에서 사용할 컨트롤러 클래스를 등록합니다.
+- providers : 현재 모듈에서 주입받아 사용, 공유할 클래스를 등록합니다.
+- exports : 현재 모듈에 등록된 프로바이더들을 다른 모듈에서 import 하여 사용할 수 있도록 공개합니다. 예를 들어 센서 서비스를 
+- imports: 
+
+
+이렇게 등록한 루트 모듈(AppModule)은 다음과 같이 main.ts 파일에서 애플리케이션을 생성할 때 사용됩니다.
+
+src/main.ts
+```
+const app = await NestFactory.create(AppModule);  
+```
+
+
+
+
+
+
+
+DI 컨테이너(Container)는 
+
+클래스를 주입가능하게 만들면 TypeDI 
 
 
 
