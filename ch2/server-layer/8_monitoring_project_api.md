@@ -16,7 +16,7 @@
 2. 등록된 센서의 id로 가장 최근 온도 조회
 3. 등록된 센서의 id와 yyyy/MM/dd ~ yyyy/MM/dd 범위로 기간내의 온도 조회
 
-우리는 아직 데이터베이스를 사용하는 방법을 학습하지 않았습니다. 그래서 일단 메모리(변수)에 데이터를 저장해놓고 API의 요구사항이 충족되면 메모리에 저장하는 기능을 데이터베이스로 저장하는 기능으로 바꿔볼 것입니다. 이 과정에서 왜 계층(layer)을 나눠야 하는지 이해할 수 있을 겁니다.
+우리는 아직 데이터베이스를 사용하는 방법을 학습하지 않았습니다. 그래서 일단 메모리(변수)에 데이터를 저장해놓고 API의 요구사항이 충족되면 메모리에 저장하는 기능을 데이터베이스로 저장하는 기능으로 바꿔볼 것입니다. 이 과정에서 계층(layer)을 나눠야 이유를 이해할 수 있을 겁니다.
 
 
 ## Project Setup
@@ -28,7 +28,7 @@ API 요구사항을 정의했으니 처음부터 프로젝트를 설정해봅시
 npm i -g @nestjs/cli
 ```
 
-우리 프로젝트의 이름을 정하고 초기 설정을 진행합니다. 저는 iot-monitoring 으로 설정했습니다.
+프로젝트의 이름을 정하고 초기 설정을 진행합니다. 저는 iot-monitoring 으로 설정했습니다.
 
 ```
 nest new iot-monitoring
@@ -37,7 +37,7 @@ nest new iot-monitoring
 패키지 매니저는 npm으로 선택합니다.
 ![[nest_monitoring_new.png]]
 [그림 : Nest 모니터링 프로젝트 초기 설정]
-초기 설정이 완료되면 본인의 코드 편집기를 열어 다음 명령어로 서버를 실행합니다. 이전 예제 프로젝트와 같은 3000번 포트를 사용하니까 이전 예제 서버가 작동중이라면 이전 예제 서버를 종료하고 서버를 실행합니다.
+초기 설정이 완료되면 본인의 코드 편집기를 열어 다음 명령어로 서버를 실행합니다. 이전 예제 프로젝트와 같은 3000번 포트를 사용하기 때문에 이전 예제 서버가 작동중이라면 종료하고 서버를 실행합니다.
 
 ![[nest_setup_done.png]]
 [그림 : Nest 모니터링 앱 실행]
@@ -76,7 +76,7 @@ nest generate resource sensors
 
 컨트롤러에서 자동 생성된 CRUD 엔드포인트들을 확인합니다. REST 정의에 따라 Create, Read, Update, Delete 기능이 자동 생성됨을 확인할 수 있습니다.
 
-src/temperatures/sensors.controller.ts
+src/sensors/sensors.controller.ts
 ```
 import { Controller, Get, Post, Body, Patch, Param, Delete } from '@nestjs/common';  
 import { SensorsService } from './sensors.service';  
@@ -183,7 +183,7 @@ GET 요청에 대한 응답 결과로 [그림 : swagger GET 4]과 같은 결과�
 
 ## DTO (Data transfer object)
 
-DTO란 Data transfer object의 약자로 계층간 데이터를 공유할때 사용하는 객체입니다. 예시로 사용자가 웹 브라우저에서 센서를 등록 한다고 생각해봅시다. 사용자는 센서 등록 페이지에서 서버에게 전달할 정보를 기입합니다.  아마도 센서 종류, 센서 이름(별칭), 시리얼 넘버 등이 있겠지요. 이러한 센서 등록에 필요한 정보를 객체에 담아서 서버에 전송합니다. DTO는 기본적으로 비지니스 로직을 가지지 않고 순수하게 데이터만을 주고받기 위한 객체입니다. 서버는 클라이언트에게 전달받은 DTO를 사용해 센서 등록 등 서비스에 필요한 비지니스 로직을 처리합니다. 또한 class-validator라는 라이브러리를 사용하여 API 호출에 필요한 데이터를 빠뜨리고 호출 하는 실수를 방지할 수 있습니다. 터미널에서 다음 명령어로 class-validator를 설치합니다.
+DTO란 Data transfer object의 약자로 계층간 데이터를 공유할때 사용하는 객체입니다. 예시로 사용자가 웹 브라우저에서 센서를 등록 한다고 생각해봅시다. 사용자는 센서 등록 페이지에서 서버에게 전달할 정보를 기입합니다.  아마도 센서 종류, 센서 이름(별칭), 시리얼 넘버 등이 있겠지요. 이러한 센서 등록에 필요한 정보를 객체에 담아서 서버에 전송합니다. DTO는 기본적으로 비즈니스 로직을 가지지 않고 순수하게 데이터만을 주고받기 위한 객체입니다. 서버는 클라이언트에게 전달받은 DTO를 사용해 센서 등록 등 서비스에 필요한 비즈니스 로직을 처리합니다. 또한 class-validator라는 라이브러리를 사용하여 API 호출에 필요한 데이터를 빠뜨리고 호출 하는 실수를 방지할 수 있습니다. 터미널에서 다음 명령어로 class-validator를 설치합니다.
 
 ```
 npm i class-validator
@@ -214,9 +214,10 @@ export class CreateSensorDto {
 @ApiProperty() 데코레이터를 지정해주지 않은 프로퍼티는 스웨거에서 확인이 불가능합니다. 따라서 다른 개발자와 협업시 해당 API에서 사용하는 DTO가 어떤 프로퍼티들로 구성되어있는지 알려야한다면 @ApiProperty() 데코레이터를 사용해줍니다.
 @IsString(), @IsNumber(), @IsEnum() 등의 데코레이터는 이름에서 유추할 수 있듯이 API 요청시 해당 프로퍼티가 데코레이터에 명시한 타입인지 검사합니다. 만약 @IsNumber() 데코레이터로 명시한 속성에 문자열 데이터가 들어온다면 해당 요청을 거부합니다. 이렇게 데코레이터를 통해 실수를 근원에 방지할 수 있으니 적극적으로 활용해줍니다.
 
-센서 생성을 위한 DTO를 정의했으니 센서를 생성하는 코드를 작성할겁니다. 그러나 우리는 아직 데이터베이스를 적용하는 방법을 모르기때문에 데이터베이스 역할을 해줄 코드가 필요합니다. 가장 간단한 방법으로 클래스의 멤버 변수로 배열을 하나 만들어서 센서가 생성될 때마다 배열에 push하는 방법으로 진행하겠습니다. 센서 서비스 클래스에 멤버 변수를 만들 수도 있지만, 센서 서비스 클래스가 오직 비지니스 로직의 책임을 지게 하기 위해 데이터를 저장하는 클래스를 새로 생성하겠습니다. 다음과 같이 SensorsRepository 클래스를 생성합니다.
+센서 생성을 위한 DTO를 정의했으니 센서를 생성하는 코드를 작성할겁니다. 그러나 우리는 아직 데이터베이스를 적용하는 방법을 모르기때문에 데이터베이스 역할을 해줄 코드가 필요합니다. 가장 간단한 방법으로 클래스의 멤버 변수로 배열을 하나 만들어서 센서가 생성될 때마다 배열에 push하는 방법으로 진행하겠습니다. 센서 서비스 클래스에 멤버 변수를 만들 수도 있지만, 센서 서비스 클래스가 오직 비즈니스 로직의 책임을 지게 하기 위해 데이터를 저장하는 클래스를 새로 생성하겠습니다. 이번에는 CLI를 사용하지 않고 직접 sensors.repository.ts 파일을 생성 하겠습니다. 파일의 경로는 src/sensors/sensors.repository.ts 입니다.
 
-센서 리파지토리로 이동하여 다음과 같이 데이터베이스 역할을 할 클래스를 작성합니다. 앞서 설명한 것처럼 데이터베이스 연동법을 아직 모르기때문에 메모리에 데이터베이스 역할을 할 sensors배열을 생성합니다. 데이터 생성 요청마다 자동으로 id가 증가하고 생성 시간까지 저장하는 sensor 객체를 배열에 push하는 saveSensor 메소드, 데이터베이스에서 센서의 id로 조회하는 findOneById 메소드, 데이터베이스의 모든 센서들을 반환하는 findAll 메소드를 작성합니다. 임시로 사용할 코드니까 any 타입은 조금만 참아주세요. 그리고 @Injectable() 데코레이터를 빼먹지 않고 반드시 작성해주세요! @Injectable() 데코레이터는 잠시후 Provider에서 설명합니다.
+
+센서 리파지토리로 이동하여 다음과 같이 데이터베이스 역할을 할 클래스를 작성합니다. 앞서 설명한 것처럼 데이터베이스 연동법을 아직 모르기때문에 메모리에 데이터베이스 역할을 할 sensors배열을 생성합니다. 데이터 생성 요청마다 자동으로 id가 증가하고 생성 시간까지 저장하는 sensorEntity 객체를 배열에 push하는 saveSensor 메소드, 데이터베이스에서 센서의 id로 조회하는 findOneById 메소드, 데이터베이스의 모든 센서들을 반환하는 findAll 메소드를 작성합니다. 임시로 사용할 sensors 배열의 타입은 any[] 타입으로 지정하겠습니다. 그리고 @Injectable() 데코레이터를 빼먹지 않고 반드시 작성해주세요! @Injectable() 데코레이터는 잠시후 Provider에서 설명합니다.
 
 src/sensors/sensors.repository.ts
 ```
@@ -229,7 +230,7 @@ export class SensorsRepository {
   
   save(createSensorDto: CreateSensorDto): any {  
     /** 임시 데이터베이스에 저장할 센서 객체 */  
-    const sensor = {  
+    const sensorEntity = {  
       id: this.sensors.length,  
       name: createSensorDto.name,  
       type: createSensorDto.sensorType,  
@@ -237,8 +238,8 @@ export class SensorsRepository {
       createdAt: new Date(),  
     };  
   
-    this.sensors.push(sensor);  
-    return sensor;  
+    this.sensors.push(sensorEntity);  
+    return sensorEntity;  
   }  
   
   findOneById(sensorId: number): any {  
@@ -251,7 +252,7 @@ export class SensorsRepository {
 }
 ```
 
-데이터베이스의 책임을 가진 센서 리파지토리를 생성했습니다. 이제 비지니스 로직의 책임을 가진 센서 서비스로 이동해서 CLI가 생성한 템플릿 코드를 지우고 다음과 같이 작성합니다. 센서 생성을 위한 createSensor 메소드, 저장된 모든 센서를 가져오는 getAllSensors 메소드, 센서의 id로 데이터베이스를 조회하는 getSensor 메소드까지 총 3개의 메소드를 작성합니다. getSensor 메소드에서는 데이터베이스에 저장된 센서가 없다면 BadRequestException 예외를 던져서 사용자에게 센서를 찾지 못했다고 메시지를 전달합니다.
+데이터베이스의 책임을 가진 센서 리파지토리를 생성했습니다. 이제 비즈니스 로직의 책임을 가진 센서 서비스로 이동해서 CLI가 생성한 템플릿 코드를 지우고 다음과 같이 작성합니다. 센서 생성을 위한 createSensor 메소드, 저장된 모든 센서를 가져오는 getAllSensors 메소드, 센서의 id로 데이터베이스를 조회하는 getSensor 메소드까지 총 3개의 메소드를 작성합니다. getSensor 메소드에서는 데이터베이스에 저장된 센서가 없다면 BadRequestException 예외를 던져서 사용자에게 센서를 찾지 못했다고 메시지를 전달합니다.
 
 src/sensors/sensors.service.ts
 ```
@@ -287,7 +288,7 @@ export class SensorsService {
 
 현재 서비스 코드는 아주 단순합니다. 컨트롤러에게 전달 받은 센서 생성에 필요한 DTO를 리파지토리에 전달하여 '데이터베이스 저장'이라는 책임을 리파지토리에 위임합니다. 리파지토리에서 저장한 결과를 콘솔로 출력하고 그대로 컨트롤러에게 반환합니다. 앞으로 여러 요구사항들이 추가되면 서비스 코드는 더 길어질 것입니다. 서비스가 점점 커지게된다면 하나의 서비스가 너무 많은 책임을 가진게 아닌지 생각해보고 분할할 수 있다면 분할해야합니다.
 
-센서 생성(Create), 조회(Read) 서비스를 작성했으니 이를 사용하여 다음과 같이 센서 컨트롤러를 작성합니다. 비지니스 로직과 데이터베이스 접근이라는 관심사를 분리했기 때문에 매우 간결한 코드로 우리가 원하는 요구사항들을 구현했습니다. 컨트롤러 작성을 마치고 서버를 실행해보면 서버가 실행되지 않으며 [그림 : 센서 리파지토리 에러] 같은 오류가 발생합니다.
+센서 생성(Create), 조회(Read) 서비스를 작성했으니 이를 사용하여 다음과 같이 센서 컨트롤러를 작성합니다. 비즈니스 로직과 데이터베이스 접근이라는 관심사를 분리했기 때문에 매우 간결한 코드로 우리가 원하는 요구사항들을 구현했습니다. 컨트롤러 작성을 마치고 서버를 실행해보면 서버가 실행되지 않으며 [그림 : 센서 리파지토리 에러] 같은 오류가 발생합니다.
 src/sensors/sensors.controller.ts
 ```
 import { Controller, Post, Body, Get, Param } from '@nestjs/common';  
@@ -310,7 +311,7 @@ export class SensorsController {
   
   @Get(':id')  
   getSensor(@Param('id') sensorId: number) {  
-    return this.sensorsService.getSensor(sensorId);  
+    return this.sensorsService.getSensor(parseInt(sensorId));
   }  
 }
 ```
@@ -354,8 +355,10 @@ import { SensorsRepository } from './sensors.repository';
 export class SensorsModule {}
 ```
 
+
 ## Provider
-프로젝트 진행을 멈추고 지루한 내용들을 공부하느라 조금 힘들 수 있겠지만 이러한 개념들을 이해하고 개발하는 것과 단순히 프레임워크에서 시키는대로 하는 것은 생산성과 퀄리티에서 많은 차이가 납니다. 기본적인 내용들이 거의 끝나가니 조금만 더 힘내주세요.
+프로젝트 진행을 잠시 멈추고 가벼운 마음으로 다음 내용들을 보겠습니다.
+지루한 내용들을 공부하느라 조금 힘들 수 있겠지만 이러한 개념들을 이해하고 개발하는 것과 단순히 프레임워크에서 시키는대로 하는 것은 개인의 성장에 많은 차이가 납니다. 핵심 내용들이 거의 끝나가니 조금만 더 힘내주세요.
 
 먼저 NestJS 공식문서에서 설명하는 provider에 대한 소개를 보겠습니다. 
 프로바이더(provider)는 Nest의 기본 개념입니다. 많은 기본 Nest 클래스는 서비스, 리파지토리, 팩토리, 헬퍼 등등의 프로바이더로 취급될 수 있습니다. 프로바이더의 주요 아이디어는 **의존성을 주입**할 수 있다는 점입니다. 이 뜻은 객체가 서로 다양한 관계를 만들 수 있다는 것을 의미합니다. 그리고 객체의 인스턴스를 연결해주는 기능은 Nest 런타입 시스템에 위임될 수 있습니다.
@@ -371,10 +374,22 @@ NestJS 공식문서는 여러분들이 다음과 같은 개념들을 이해하�
 
 
 ### 계층형 구조 (Layered Architecture)
-계층형 구조 (Layered Architecture)는 n-tier architecture 라고도 불리며 
+계층형 구조 (Layered Architecture)는 n-tier architecture 라고도 불리며 개발하고자 하는 시스템의 성격상 여러 개의 계층을 구성할 수 있습니다. 핵심은 데이터베이스를 읽고 쓰는 등의 직접 상호작용하는 계층, 데이터를 가공하는 계층, 가공된 데이터를 사용자에게 제공하는 계층으로 시스템을 분리할 수 있습니다. 계층을 분할해 모듈간 의존성을 줄여 유지보수하기 좋은 구조를 유지합니다.
+
+#### Presentation 계층
+사용자와 직접 상호작용하는 계층입니다. 우리가 여태까지 NestJS에서 사용한 컨트롤러를 생각하면 이해가 쉽습니다. 컨트롤러는 사용자의 요청을 받아 해당 요청을 처리할 수 있는 서비스에게 전달하고 처리 결과를 반환받아 사용자에게 응답합니다.
+
+#### Business(Domain) 계층
+핵심 비즈니스 로직이 들어가는 계층입니다. 개발하고자 하는 시스템의 성격상 비즈니스 계층은 여러 계층으로 분할될 수 있지만 핵심 내용은 사용자의 요청을 전달받아 필요한 데이터를 가공하여 처리하고 결과를 반환합니다. 이 때 데이터베이스 등의 인프라에 접근해야한다면 직접 접근하지않고 Data Access 계층에 데이터를 처리하는 작업을 요청합니다. 예를 들어 사용자가 회원가입을 한다면 Presentation 계층에서 사용자의 이메일과 비밀번호를 전달받아 Business계층의 회원가입을 진행하는 서비스에 전달합니다. Business계층의 회원가입 서비스는 사용자의 이메일과 비밀번호를 저장하기위해 데이터베이스에 직접 접근하지 않고 Data Access 계층에 이메일과 비밀번호를 전달해 데이터의 저장을 요청하고 저장 결과를 반환받아 Presentation 계층에 회원가입 결과를 전달합니다.
+
+#### Data Access 계층
+Business 계층의 요청대로 데이터베이스 등의 인프라에 직접 접근하여 데이터를 읽고 수정하는 등의 작업을 하는 계층입니다.  
+Data Access 계층은 데이터베이스에 접근해 작업을 처리하여 처리 결과를 전달하는 책임만 가집니다. 덕분에 Business 계층은 Data Access 계층의 데이터베이스가 어떻게 구성되어 있는지 알 필요가 없습니다. 오직 데이터의 조회, 수정 결과 등을 전달 받기 때문에 데이터베이스를 MySQL에서 PostgreSQL로 변경해도 Business 계층의 코드는 변경될 일이 없습니다.
 
 
 ### 의존성 주입 (Dependency Injection)
+NestJS 공식문서에서 프로바이더의 핵심으로 의존성을 주입(Dependency injection)이라는 키워드를 사용했습니다. 대체 의존성 주입이 무엇일까요?
+
 예를 들어 MMORPG 게임의 궁수(Archer) 캐릭터가 있다고 생각해봅시다. 궁수 직업은 활(bow)을 사용할 수 있습니다. 다음은 Archer 클래스에서 bow 인스턴스를 사용하는 코드입니다.
 ```
 class Bow {  
@@ -401,7 +416,7 @@ archer.shot(); /** Bow shot! */
 
 여기까지는 문제가 없습니다. 그러나 다음 업데이트때 궁수의 2차 전직으로 사냥꾼이 되어 단검(dagger)을 쓰도록 패치해달라는 요구사항이 생겼습니다. 단검은 발사(shot)하지 않고 찌르기(stab) 공격을 합니다. 큰일났네요, 이미 수백만줄의 코드 베이스에 궁수 캐릭터가 공격할 때 활을 발사하도록 작성해버렸습니다. 요구사항에 대응하려면 얼마나 걸릴지 상상이 안됩니다.
 
-이전에 설명한 객체지향의 설계 원칙(SOLID)을 기억하시나요? 좋은 객체지향 설계는 구체적인 개념에 의존하지않고 추상적인 개념에 의존해야합니다. 궁수 클래스에서 new를 사용해 활을 생성하면 궁수가 활에게 의존하게 됩니다. 이처럼 직접, 구체적으로 클래스를 인스턴스화 하는 행위는 유지보수가 어려운 코드가 됩니다. 우리는 의존성 주입(dependency injection)을 통해 이 문제를 해결할 수 있습니다. 
+이전에 설명한 객체지향의 설계 원칙(SOLID)을 기억하시나요? 좋은 객체지향 설계는 구체적인 개념에 의존하지않고 추상적인 개념에 의존해야합니다. 궁수 클래스에서 new 연산자를 사용해 활을 생성하면 궁수가 활에게 의존하게 됩니다. 이처럼 직접, 구체적으로 클래스를 인스턴스화 하는 행위는 유지보수가 어려운 코드가 됩니다. 우리는 의존성 주입(dependency injection)을 통해 이 문제를 해결할 수 있습니다. 
 다음과 같이 인터페이스를 사용해 활과 단검은 무기(Weapon)의 use() 메소드를 구현합니다. 또한 신규 캐릭터의 추가를 생각해 Character 인터페이스도 만들어 두겠습니다.
 ```
 interface Weapon {  
@@ -553,14 +568,14 @@ hunter.attack(); /** Dagger stab & Gun shot! */
 이제 센서 리파지토리를 생성하고 사용하려 했을때 발생한 문제를 추측할 수 있습니다. 센서 서비스에서 리파지토리를 사용하기 위해 Nest의 DI 컨테이너에서 센서 리파지토리가 주입되기를 원했지만, DI 컨테이너가 의존성을 관리하는 프로바이더(provider) 목록에 센서 리파지토리가 등록되지 않아서 생긴 문제입니다. Nest의 DI 시스템은 @Module 데코레이터에 등록한 providers 배열에서 필요한 클래스를 찾아 주입해줍니다. Nest의 세계에서 **제어**당할 클래스는 프로바이더 목록에 등록해야함을 잊지마세요!
 
 
-### 모듈(module) 
+### 모듈(Module) 
 
 Nest 애플리케이션은 [그림 : Nest 공식 문서 모듈 설명] 처럼 루트 모듈(application module)에서 여러 모듈들을 레고 블럭처럼 조립하여 애플리케이션을 구성합니다. 
 
 ![[nest_module.png]]
 [그림 : Nest 공식 문서 모듈 설명]
 
-Nest CLI를 사용하여 Sensors 모듈을 생성했다면 다음과 같이 app.module.ts 파일의 imports 배열에 자동으로 센서 모듈이 등록되어 있는 것을 확인할 수 있습니다. 만약 CLI를 사용하지 않고 클래스를 생성했다면 모듈 파일에 등록해주는 작업이 필요합니다.
+Nest CLI를 사용하여 Sensors 모듈을 생성했다면 다음과 같이 app.module.ts 파일의 imports 배열에 자동으로 센서 모듈이 등록되어 있는 것을 확인할 수 있습니다. 만약 CLI를 사용하지 않고 클래스를 생성했다면 모듈 파일에 등록해 주는 작업이 필요합니다.
 
 src/app.module.ts 
 ```
@@ -578,10 +593,11 @@ export class AppModule {}
 ```
 
 @Module() 데코레이터는 다음과 같은 프로퍼티들을 가질 수 있습니다.
-- controllers : 현재 모듈에서 사용할 컨트롤러 클래스를 등록합니다.
-- providers : 현재 모듈에서 주입받아 사용, 공유할 클래스를 등록합니다.
-- exports : 현재 모듈에 등록된 프로바이더들을 다른 모듈에서 import 하여 사용할 수 있도록 공개합니다. 예를 들어 센서 서비스를 
-- imports: 
+- controllers : 현재 모듈에서 사용할 컨트롤러 컨트롤러를 등록합니다.
+- providers : 현재 모듈에서 주입받아 사용, 공유할 프로바이더를 등록합니다.
+- imports: 현재 모듈에서 사용할 다른 모듈을 등록합니다.
+- exports : 현재 모듈에 등록된 프로바이더들을 다른 모듈에서 import 하여 사용할 수 있도록 공개합니다. 예를 들어 센서 모듈에서 새로운 프로바이더를 생성하고 다른 모듈의 프로바이더에서 사용하려면 providers 배열에 새로운 프로바이더를 등록 후, exports 배열에 새로운 프로바이더를 등록합니다. 더 자세한 사항은 공식 문서의 프로바이더 항목을 참조하세요.
+
 
 
 이렇게 등록한 루트 모듈(AppModule)은 다음과 같이 main.ts 파일에서 애플리케이션을 생성할 때 사용됩니다.
@@ -592,34 +608,54 @@ const app = await NestFactory.create(AppModule);
 ```
 
 
+다음과 같이 프로바이더에 등록한 SensorsRepository가 주입되었는지 확인하는 코드를 작성합니다.
 
-
-
-
-
-DI 컨테이너(Container)는 
-
-클래스를 주입가능하게 만들면 TypeDI 
-
-
-
-
-
-
-## Module
-
-이제 create 함수에 넘겨주고있는 AppModule이 어떻게 생겼는지 보겠습니다.
-src/app.module.ts
+src/main.ts
 ```
-import { Module } from '@nestjs/common';  
-import { AppController } from './app.controller';  
-import { AppService } from './app.service';  
+import { NestFactory } from '@nestjs/core';  
+import { AppModule } from './app.module';  
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';  
+import { SensorsRepository } from './sensors/sensors.repository';  
   
-@Module({  
-  imports: [],  
-  controllers: [AppController],  
-  providers: [AppService],  
-})  
-export class AppModule {}
+async function bootstrap() {  
+  const app = await NestFactory.create(AppModule);  
+  
+  /** 프로바이더가 주입 되었는지 확인 */  
+  const injectedRepository = app.get<SensorsRepository>(SensorsRepository);  
+  console.log('Injected: ', injectedRepository);  
+  
+  const swaggerConfig = new DocumentBuilder()  
+    .setTitle('IoT Monitoring')  
+    .setDescription('Temperatures monitoring API')  
+    .setVersion('1.0')  
+    .addTag('sensors')  
+    .build();  
+  
+  const document = SwaggerModule.createDocument(app, swaggerConfig);  
+  
+  /** 스웨거 문서에 접근하기 위한 경로를 설정합니다. */  
+  SwaggerModule.setup('api-docs', app, document);  
+  
+  await app.listen(3000);  
+}  
+  
+bootstrap();
 ```
 
+다음과 같이 등록한 프로바이더가 주입된 것을 확인할 수 있습니다.
+![[injected.png]]
+
+이제 스웨거로 우리가 생성한 임시 데이터베이스가 작동하는지 테스트 해봅니다. 다음과 같이 /sensors POST 요청으로 데이터의 생성 결과를 확인할 수 있습니다.
+
+![[sensor_create_1.png]]
+[그림 : 센서 생성 요청]
+
+
+![[sensor_create_2.png]]
+[그림 : 센서 생성 응답]
+
+센서 생성 이후 /sensors GET 요청으로 임시 데이터베이스에 저장된 센서를 조회할 수 있습니다.
+
+![[sensors_get.png]]
+
+[그림 : 센서 목록 요청]
