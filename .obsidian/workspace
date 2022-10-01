@@ -4,17 +4,15 @@
     "type": "split",
     "children": [
       {
-        "id": "b006fa0f9c0419ee",
+        "id": "26071205e520611c",
         "type": "leaf",
-        "pinned": true,
         "state": {
           "type": "markdown",
           "state": {
             "file": "ch2/server-layer/8_monitoring_project_api.md",
             "mode": "source",
             "source": false
-          },
-          "pinned": true
+          }
         }
       }
     ],
@@ -65,7 +63,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 300
+    "width": 298.5
   },
   "right": {
     "id": "f081b6795d3924bb",
@@ -132,17 +130,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "b006fa0f9c0419ee",
+  "active": "26071205e520611c",
   "lastOpenFiles": [
-    "nest_monitoring_newm.png.md",
     "ch2/server-layer/8_monitoring_project_api.md",
-    "resources/ch2/8/nest_monitoring_newm.png",
-    "ch2/server-layer/7_hello_nestjs.md",
+    "ch1/1_system_introduce.md",
+    "ch2/server-layer/1_server_layer.md",
     "ch2/server-layer/6_nestjs_tutorial.md",
+    "ch2/server-layer/7_hello_nestjs.md",
     "ch2/server-layer/5_nestjs_setup.md",
-    "ch2/server-layer/4_nestjs_introduce.md",
     "ch2/server-layer/3_tech_required.md",
+    "ch2/server-layer/4_nestjs_introduce.md",
     "ch2/server-layer/2_server_introduce.md",
-    "ch2/server-layer/1_server_layer.md"
+    "ch1/3_mqtt_practice.md"
   ]
 }

@@ -214,21 +214,44 @@ export class CreateSensorDto {
 @ApiProperty() 데코레이터를 지정해주지 않은 프로퍼티는 스웨거에서 확인이 불가능합니다. 따라서 다른 개발자와 협업시 해당 API에서 사용하는 DTO가 어떤 프로퍼티들로 구성되어있는지 알려야한다면 @ApiProperty() 데코레이터를 사용해줍니다.
 @IsString(), @IsNumber(), @IsEnum() 등의 데코레이터는 이름에서 유추할 수 있듯이 API 요청시 해당 프로퍼티가 데코레이터에 명시한 타입인지 검사합니다. 만약 @IsNumber() 데코레이터로 명시한 속성에 문자열 데이터가 들어온다면 해당 요청을 거부합니다. 이렇게 데코레이터를 통해 실수를 근원에 방지할 수 있으니 적극적으로 활용해줍니다.
 
-센서 생성을 위한 DTO를 정의했으니 센서를 생성하는 코드를 작성할겁니다. 그러나 우리는 아직 데이터베이스를 적용하는 방법을 모르기때문에 데이터베이스 역할을 해줄 코드가 필요합니다. 가장 간단한 방법으로 클래스의 멤버 변수로 배열을 하나 만들어서 센서가 생성될 때마다 배열에 push하는 방법으로 진행하겠습니다. 센서 서비스 클래스에 멤버 변수를 만들 수도 있지만, 센서 서비스 클래스가 오직 비즈니스 로직의 책임을 지게 하기 위해 데이터를 저장하는 클래스를 새로 생성하겠습니다. 이번에는 CLI를 사용하지 않고 직접 sensors.repository.ts 파일을 생성 하겠습니다. 파일의 경로는 src/sensors/sensors.repository.ts 입니다.
+센서 생성을 위한 DTO를 정의했으니 센서를 생성하고 데이터베이스에 저장하는 코드를 작성할겁니다. 그러나 우리는 아직 데이터베이스를 적용하는 방법을 모르기때문에 임시 데이터베이스 역할을 해줄 코드가 필요합니다. 가장 간단한 방법으로 클래스의 멤버 변수로 배열을 하나 만들어서 센서가 생성될 때마다 배열에 push하는 방법으로 진행하겠습니다. 우선 데이터베이스에 저장할 센서 엔티티를 작성합니다. CLI로 센서 리소스를 생성했다면 src/sensors/entities 디렉토리 내부에 sensor.entity.ts 파일이 생성됩니다. (...엔티티 설명) 앞으로 데이터베이스와 관련한 작업시 엔티티 객체를 사용하게됩니다. 다음과 같이 센서 엔티티를 작성합니다.
+
+src/sensors/entities/sensor.entity.ts
+```
+export class Sensor {  
+  id: number;  
+  name: string;  
+  type: string;  
+  serialNumber: number;  
+  createdAt: Date;  
+}
+```
 
 
-센서 리파지토리로 이동하여 다음과 같이 데이터베이스 역할을 할 클래스를 작성합니다. 앞서 설명한 것처럼 데이터베이스 연동법을 아직 모르기때문에 메모리에 데이터베이스 역할을 할 sensors배열을 생성합니다. 데이터 생성 요청마다 자동으로 id가 증가하고 생성 시간까지 저장하는 sensorEntity 객체를 배열에 push하는 saveSensor 메소드, 데이터베이스에서 센서의 id로 조회하는 findOneById 메소드, 데이터베이스의 모든 센서들을 반환하는 findAll 메소드를 작성합니다. 임시로 사용할 sensors 배열의 타입은 any[] 타입으로 지정하겠습니다. 그리고 @Injectable() 데코레이터를 빼먹지 않고 반드시 작성해주세요! @Injectable() 데코레이터는 잠시후 Provider에서 설명합니다.
+센서 서비스 클래스에 임시 데이터베이스 변수를 만들 수도 있지만, 센서 서비스 클래스가 오직 비즈니스 로직의 책임을 지게 하기 위해 데이터를 저장하는 클래스를 새로 생성하겠습니다. 이번에는 CLI를 사용하지 않고 직접 sensors.repository.ts 파일을 생성 하겠습니다. 파일의 경로는 src/sensors/sensors.repository.ts 입니다.
+
+다음과 같이 데이터베이스 역할을 할 센서 리파지토리 클래스를 작성합니다. 앞서 설명한 것처럼 데이터베이스 연동법을 아직 모르기때문에 메모리(변수) 데이터베이스 역할을 할 sensors배열을 생성합니다. 데이터 생성 요청마다 자동으로 id를 생성하고 시간까지 저장하는 sensorEntity 객체를 배열에 push하는 saveSensor 메소드, 데이터베이스에서 센서의 id로 조회하는 findOneById 메소드, 데이터베이스의 모든 센서들을 반환하는 findAll 메소드를 작성합니다. 그리고 @Injectable() 데코레이터를 빼먹지 않고 반드시 작성해주세요! @Injectable() 데코레이터는 잠시후 Provider에서 설명합니다.
 
 src/sensors/sensors.repository.ts
 ```
 import { CreateSensorDto } from './dto/create-sensor.dto';  
 import { Injectable } from '@nestjs/common';  
+import { Sensor } from './entities/sensor.entity';  
   
 @Injectable()  
 export class SensorsRepository {  
-  sensors: any[] = [];  
+  /** 임시 데이터베이스 역할 배열 */  
+  private sensors: Sensor[] = [  
+    {  
+      id: 0,  
+      name: 'first',  
+      type: 'temperature',  
+      serialNumber: 1111,  
+      createdAt: new Date(),  
+    },  
+  ];  
   
-  save(createSensorDto: CreateSensorDto): any {  
+  save(createSensorDto: CreateSensorDto): Sensor {  
     /** 임시 데이터베이스에 저장할 센서 객체 */  
     const sensorEntity = {  
       id: this.sensors.length,  
@@ -242,14 +265,15 @@ export class SensorsRepository {
     return sensorEntity;  
   }  
   
-  findOneById(sensorId: number): any {  
+  findOneById(sensorId: number): Sensor {  
     return this.sensors[sensorId];  
   }  
   
-  findAll(): any[] {  
+  findAll(): Sensor[] {  
     return this.sensors;  
   }  
 }
+
 ```
 
 데이터베이스의 책임을 가진 센서 리파지토리를 생성했습니다. 이제 비즈니스 로직의 책임을 가진 센서 서비스로 이동해서 CLI가 생성한 템플릿 코드를 지우고 다음과 같이 작성합니다. 센서 생성을 위한 createSensor 메소드, 저장된 모든 센서를 가져오는 getAllSensors 메소드, 센서의 id로 데이터베이스를 조회하는 getSensor 메소드까지 총 3개의 메소드를 작성합니다. getSensor 메소드에서는 데이터베이스에 저장된 센서가 없다면 BadRequestException 예외를 던져서 사용자에게 센서를 찾지 못했다고 메시지를 전달합니다.
@@ -259,19 +283,20 @@ src/sensors/sensors.service.ts
 import { BadRequestException, Injectable } from '@nestjs/common';  
 import { CreateSensorDto } from './dto/create-sensor.dto';  
 import { SensorsRepository } from './sensors.repository';  
+import { Sensor } from './entities/sensor.entity';  
   
 @Injectable()  
 export class SensorsService {  
   constructor(private readonly sensorsRepository: SensorsRepository) {}  
   
-  createSensor(createSensorDto: CreateSensorDto): any {  
+  createSensor(createSensorDto: CreateSensorDto): Sensor {  
     const saveResult = this.sensorsRepository.save(createSensorDto);  
     console.log('Created: ', saveResult);  
   
     return saveResult;  
   }  
   
-  getSensor(sensorId: number): any {  
+  getSensor(sensorId: number): Sensor {  
     const foundResult = this.sensorsRepository.findOneById(sensorId);  
     if (!foundResult) {  
       throw new BadRequestException('sensor not found!');  
@@ -280,7 +305,7 @@ export class SensorsService {
     return foundResult;  
   }  
   
-  getAllSensors(): any[] {  
+  getAllSensors(): Sensor[] {  
     return this.sensorsRepository.findAll();  
   }  
 }
@@ -658,4 +683,172 @@ bootstrap();
 
 ![[sensors_get.png]]
 
-[그림 : 센서 목록 요청]
+[그림 : 센서 목록 응답]
+
+
+온도 센서를 임시 데이터베이스에 생성했으니 이제 온도 데이터를 조회하는 API를 생성합니다. 이전과 마찬가지로 아직 데이터베이스 연동하는 방법을 배우지 않았으니 임시 데이터베이스 역할을 할 변수를 사용하겠습니다. CLI에서 다음 명령어로 센서 디렉토리 내부에 온도 모듈과 서비스를 생성합니다.
+```
+nest g mo sensors/temperatures
+```
+
+```
+nest g s sensors/temperatures
+```
+
+CLI로 모듈을 생성하면 Nest는 해당 모듈을 사용할 수 있도록 자동으로 구성요소들을 등록해줍니다. CLI를 통해 모듈과 서비스를 생성했다면 temperatures.module.ts 는 다음과 같이 작성됩니다. providers 배열에 온도 서비스가 자동으로 등록된 것을 확인할 수 있습니다.
+
+src/sensors/temperatures.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { TemperaturesService } from './temperatures.service';  
+  
+@Module({  
+  providers: [TemperaturesService]  
+})  
+export class TemperaturesModule {}
+```
+
+[그림 : Nest 모니터링 앱 구조_2] 는 온도 모듈 생성 이후 디렉토리 구조입니다.
+
+
+
+![[tree_2.png]]
+[그림 : Nest 모니터링 앱 구조_2]
+
+
+이전에 센서 리파지토리를 생성한 것처럼 이번에도 온도를 저장하는 책임을 가진 온도 리파지토리를 생성하겠습니다. 우선 데이터베이스에 저장될 온도 엔티티를 작성합니다. 다음과 같이 src/sensors/temperatures/entities 디렉토리를 생성하고 내부에 temperature.entity.ts 파일을 생성합니다.
+
+src/sensors/temperatures/temperature.entity.ts
+```
+export class Temperature {  
+  id: number;  
+  sensorId: number;  
+  temperature: number;  
+  createdAt: Date;  
+}
+```
+
+온도 엔티티 생성 이후 src/sensors/temperatures 디렉토리 내부에 temperatures.repository.ts 파일을 생성하고 다음과 같이 온도 리파지토리 클래스를 작성합니다. 이전과 마찬가지로 꼭 @Injectable() 데코레이터를 작성해주세요!
+
+src/sensors/temperatures/temperatures.repository.ts
+```
+import { Injectable } from '@nestjs/common';  
+import { Temperature } from './entities/temperature.entity';  
+  
+@Injectable()  
+export class TemperaturesRepository {  
+  /** 임시 데이터베이스 역할 배열 */  
+  private temperatures: Temperature[] = [  
+    { id: 0, sensorId: 0, temperature: 21.5, createdAt: new Date('2022/01/01') },  
+    { id: 1, sensorId: 0, temperature: 22, createdAt: new Date('2022/01/02') },  
+    { id: 2, sensorId: 0, temperature: 23, createdAt: new Date('2022/01/03') },  
+    { id: 3, sensorId: 0, temperature: 24, createdAt: new Date('2022/01/04') },  
+  ];  
+  
+  findBySensorId(sensorId: number): Temperature[] {  
+    return this.temperatures.filter((column) => column.sensorId === sensorId);  
+  }  
+}
+```
+
+센서의 id로 데이터베이스에 저장되어 있는 온도 데이터들을 가져오는 기능을 추가했습니다. findBySensorId 메서드는 센서의 id를 받아 해당 센서가 저장한 모든 온도 데이터들을 조회하는 기능을 가집니다. 이후 데이터베이스를 적용해도 매개변수 타입과 리턴 타입이 변하지 않으므로 서비스 계층의 코드를 수정할 일이 없습니다.
+
+
+
+다음과 같이 온도 서비스에 센서 id로 조회한 데이터들 중 가장 최근 데이터를  찾는 기능을 추가합니다. 지금은 데이터베이스를 적용하지 않기 때문에 간단한 helper 메서드를 만들어 요구사항을 구현합니다. 데이터베이스 적용 이후 임시 메서드는 제거하고 해당 책임은 데이터베이스에 위임합니다.
+
+src/sensors/temperatures/temperatures.service.ts
+```
+import { BadRequestException, Injectable } from '@nestjs/common';  
+import { TemperaturesRepository } from './temperatures.repository';  
+import { Temperature } from './entities/temperature.entity';  
+  
+@Injectable()  
+export class TemperaturesService {  
+  constructor(  
+    private readonly temperaturesRepository: TemperaturesRepository,  
+  ) {}  
+  
+  getLatestTemperature(sensorId: number): Temperature {  
+    const temperatures = this.temperaturesRepository.findBySensorId(sensorId);  
+    if (this.isEmpty(temperatures)) {  
+      throw new BadRequestException('Temperatures not found!');  
+    }  
+  
+    return temperatures.reduce(this.getLatest);  
+  }  
+  
+  private isEmpty(temperatures: Temperature[]): boolean {  
+    return temperatures.length === 0;  
+  }  
+  
+  /** 데이터베이스 사용전 임시 helper 메서드 */  
+  private getLatest(previous: Temperature, current: Temperature): Temperature {  
+    return previous.createdAt > current.createdAt ? previous : current;  
+  }  
+}
+```
+
+
+온도 데이터를 조회하는 서비스를 작성했으니 다음과 같이 CLI로 온도 컨트롤러를 생성합니다.
+
+```
+nest g co sensors/temperatures
+```
+
+
+다음과 같이 온도 모듈 클래스에 자동으로 등록된 컨트롤러를 확인하고 이전에 생성한 온도 리파지토리도 프로바이더에 등록합니다.
+
+src/sensors/temperatures/temperatures.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { TemperaturesService } from './temperatures.service';  
+import { TemperaturesController } from './temperatures.controller';  
+import { TemperaturesRepository } from './temperatures.repository';  
+  
+@Module({  
+  controllers: [TemperaturesController],  
+  providers: [TemperaturesService, TemperaturesRepository],  
+})  
+export class TemperaturesModule {}
+```
+
+
+온도 컨트롤러를 다음과 같이 작성합니다.
+
+src/sensors/temperatures/temperatures.controller.ts
+```
+import { Controller, Get, Param } from '@nestjs/common';  
+import { TemperaturesService } from './temperatures.service';  
+  
+/** 센서의 id를 식별하기 위한 파라미터 */  
+@Controller('sensors/:id/temperatures')  
+export class TemperaturesController {  
+  constructor(private readonly temperaturesService: TemperaturesService) {}  
+  
+  @Get('latest')  
+  getLatestTemperature(  
+    @Param('id') sensorId: string /** 컨트롤러의 id 파라미터를 가져온다 */,  
+  ) {  
+    return this.temperaturesService.getLatestTemperature(parseInt(sensorId));  
+  }  
+}
+```
+
+[그림: 센서 최신 온도 조회] 과 같이 0번 센서가 저장한 최신 온도 데이터를 조회합니다. 조회 결과로 [그림: 센서 최신 온도 조회 결과]와 같이 온도 리파지토리 클래스에 임시로 넣은 데이터들 중 최신 데이터를 확인할 수 있습니다.
+
+![[sensors_temperatures_get.png]]
+[그림: 센서 온도 조회]
+
+
+![[sensors_temperatures_get_result.png]]
+[그림: 센서 온도 조회 결과]
+
+
+
+### 데이터베이스(Database)
+지금까지 우리는 데이터베이스 없이 임시로 메모리(변수)에 데이터를 다뤘습니다. 이제 데이터베이스를 다룰 시간입니다. 핵심 비즈니스 로직을 담당하는 계층과 데이터베이스에 접근하는 계층을 나누었기 때문에 임시 데이터베이스를 실제 데이터베이스로 바꾸는 인프라에 관한 코드만 추가하면 됩니다. 
+그런데 인프라 환경을 한번 생각해 볼 필요가 있습니다. 개발(development) 환경과 실제 고객의 정보를 저장하는 배포(production)환경 모두 같은 데이터베이스를 사용하면 어떻게 될까요? 개발 환경에서는 데이터베이스의 구조가 변경될 일이 자주 발생합니다. 이때 개발자가 실수로 개발에 사용되는 데이터베이스가 아닌, 실제 고객의 정보가 담긴 배포 환경의 데이터베이스에 접근해 고객의 데이터를 전부 날려버리는 일이 발생할 수 있습니다. 이러한 일을 사전에 차단하기 위해 개발 환경의 데이터베이스와 운영 환경의 데이터베이스를 분리해야 합니다. 
+
+
+#### 환경변수 (configuration)
