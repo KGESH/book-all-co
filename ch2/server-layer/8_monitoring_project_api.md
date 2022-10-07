@@ -846,9 +846,147 @@ export class TemperaturesController {
 
 
 
-### 데이터베이스(Database)
+### 인프라 관리 (Infrastructure)
 지금까지 우리는 데이터베이스 없이 임시로 메모리(변수)에 데이터를 다뤘습니다. 이제 데이터베이스를 다룰 시간입니다. 핵심 비즈니스 로직을 담당하는 계층과 데이터베이스에 접근하는 계층을 나누었기 때문에 임시 데이터베이스를 실제 데이터베이스로 바꾸는 인프라에 관한 코드만 추가하면 됩니다. 
-그런데 인프라 환경을 한번 생각해 볼 필요가 있습니다. 개발(development) 환경과 실제 고객의 정보를 저장하는 배포(production)환경 모두 같은 데이터베이스를 사용하면 어떻게 될까요? 개발 환경에서는 데이터베이스의 구조가 변경될 일이 자주 발생합니다. 이때 개발자가 실수로 개발에 사용되는 데이터베이스가 아닌, 실제 고객의 정보가 담긴 배포 환경의 데이터베이스에 접근해 고객의 데이터를 전부 날려버리는 일이 발생할 수 있습니다. 이러한 일을 사전에 차단하기 위해 개발 환경의 데이터베이스와 운영 환경의 데이터베이스를 분리해야 합니다. 
+그런데 인프라 환경을 한번 생각해 볼 필요가 있습니다. 개발(development) 환경과 실제 고객의 정보를 저장하는 배포(production)환경 모두 같은 데이터베이스를 사용하면 어떻게 될까요? 개발 환경에서는 데이터베이스의 구조가 변경될 일이 자주 발생합니다. 이때 개발자가 실수로 개발에 사용되는 데이터베이스가 아닌, 실제 고객의 정보가 담긴 배포 환경의 데이터베이스에 접근해 고객의 데이터를 전부 날려버리는 일이 발생할 수 있습니다. 이러한 일을 사전에 차단하기 위해 개발 환경의 데이터베이스와 운영 환경의 데이터베이스를 분리해야 합니다. 이러한 환경에 따른 분리 방법으로 Nest에서 환경변수를 관리하는 모듈을 제공합니다.
 
 
-#### 환경변수 (configuration)
+#### 환경변수 다루기 (Configuration)
+자바스크립트 생태계에서 환경변수를 다루는 방법으로 dotenv (.env)가 주로 사용됩니다. 예를 들어 개발 환경과 배포 환경의 데이터베이스 접속 URL을 다르게 하고 싶다면 여러 변수들을 정의해둔 .env 파일을  NODE_ENV 환경변수에 따라 다르게 불러옵니다.
+
+다음과 같이 dotenv 패키지를 설치하고 2개의 env 파일을 프로젝트 최상단에 작성합니다.
+
+```
+npm i dotenv
+```
+
+.env.development
+```
+DATABASE_HOST=localhost
+DATABASE_PORT=5432
+```
+
+.env.production
+```
+DATABASE_HOST=my-production-database-host
+DATABASE_PORT=5432
+```
+
+package.json
+```
+...
+"start:dev": "NODE_ENV=development nest start --watch",
+"build": "nest build",
+"start:prod": "NODE_ENV=production node dist/main",
+...
+```
+
+만약 Windows 운영체제라면 다음과 같이 cross-env 패키지를 설치해서 환경변수를 주입합니다. cross-env는 운영체제에 관계없이 통일된 방법으로 환경변수를 주입합니다.
+```
+npm i -D cross-env
+```
+
+package.json
+```
+...
+"start:dev": "cross-env NODE_ENV=development nest start --watch",
+"build": "nest build",
+"start:prod": "cross-env NODE_ENV=production node dist/main",
+...
+```
+
+다음과 같이 main.ts에서 env 파일을 불러옵니다. 파일을 불러오는 기능들은 해당 함수를 호출하는 파일의 경로를 기준으로 파일을 탐색하는 걸 잊지 마세요. 예를 들어 프로젝트를 빌드 하게 되면 main.ts 파일의 경로는 src/main.ts가 아니라 dist/main.ts가 됩니다. main.ts 기준으로 env 파일은 한 단계 상위 디렉토리에 존재하기 때문에 파일을 불러올 때 올바른 경로를 가리켜야 합니다.
+
+src/main.ts
+```
+...
+
+import * as path from 'path';  
+import * as dotenv from 'dotenv';  
+  
+/** config() 함수를 실행하는 파일 위치 기준  
+ *  실제 env 파일의 경로를 지정합니다  */  
+dotenv.config({  
+  path: path.join(__dirname, '../', `.env.${process.env.NODE_ENV}`),  
+});  
+  
+const DATABASE_HOST = process.env.DATABASE_HOST;  
+const DATABASE_PORT = +process.env.DATABASE_PORT;  
+// -> parseInt(process.env.DATABASE_PORT)
+console.log(`${DATABASE_HOST}:${DATABASE_PORT}`);
+
+...
+```
+
+
+#### 환경변수 모듈 (Config Module)
+이전까지 환경변수를 다루는 방법을 알아봤습니다. Nest에서 환경변수를 다룰때 직접 dotenv를 사용하기보다 Nest에서 제공하는 ConfigModule을 사용합니다. 다음과 같이 @nestjs/config 패키지를 설치합니다.
+
+```
+npm i @nestjs/config
+```
+
+패키지 설치 이후 다음과 같이 ConfigModule에서 env 파일에 정의된 환경변수를 불러옵니다.
+src/app.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { AppController } from './app.controller';  
+import { AppService } from './app.service';  
+import { SensorsModule } from './sensors/sensors.module';  
+import { ConfigModule } from '@nestjs/config';  
+import * as path from 'path';  
+  
+@Module({  
+  imports: [  
+    ConfigModule.forRoot({  
+      envFilePath: path.join(__dirname, '../', `.env.${process.env.NODE_ENV}`),  
+      isGlobal: true, // Config 모듈을 전역으로 등록합니다.  
+    }),  
+    SensorsModule,  
+  ],  
+  controllers: [AppController],  
+  providers: [AppService],  
+})  
+export class AppModule {}
+```
+ConfigModule을 등록할 때 isGlobal 옵션을 true로 설정하면 등록한 모듈을 전역에서 사용합니다. isGlobal의 기본값은 false입니다. 필요한 모듈마다 별도로 ConfigModule을 import할 수도 있습니다. ConfigModule로 env 파일을 불러오고 이 값을 가져오는 ConfigService 프로바이더를 주입해서 환경변수를 사용합니다. 
+
+
+이전에 dotenv 관련 코드를 제거하고 main.ts를 다음과 같이 작성 후, env 파일이 로딩 되었는지 확인합니다.
+src/main.ts
+```
+import { NestFactory } from '@nestjs/core';  
+import { AppModule } from './app.module';  
+import { DocumentBuilder, SwaggerModule } from '@nestjs/swagger';  
+import { ConfigService } from '@nestjs/config';  
+  
+async function bootstrap() {  
+  const app = await NestFactory.create(AppModule);  
+  
+  /** 환경변수 확인 */  
+  const configService = app.get<ConfigService>(ConfigService);  
+  const DATABASE_HOST = configService.get<string>('DATABASE_HOST');  
+  const DATABASE_PORT = +configService.get<string>('DATABASE_PORT');  
+  console.log(`${DATABASE_HOST}:${DATABASE_PORT}`);  
+  
+  const swaggerConfig = new DocumentBuilder()  
+    .setTitle('IoT Monitoring')  
+    .setDescription('Temperatures monitoring API')  
+    .setVersion('1.0')  
+    .addTag('sensors')  
+    .build();  
+  
+  const document = SwaggerModule.createDocument(app, swaggerConfig);  
+  SwaggerModule.setup('api-docs', app, document);  
+  
+  await app.listen(3000);  
+}  
+  
+bootstrap();
+```
+
+[그림: 환경변수 주입 결과]
+
+
+#### 데이터베이스 (Database)
+지금까지 우리는 데이터베이스 없이 임시로 메모리(변수)에 데이터를 다뤘습니다. 이제 데이터베이스를 다룰 시간입니다. 핵심 비즈니스 로직을 담당하는 계층과 데이터베이스에 접근하는 계층을 나누었기 때문에 임시 데이터베이스를 실제 데이터베이스로 바꾸는 인프라에 관한 코드만 추가하면 됩니다. 
