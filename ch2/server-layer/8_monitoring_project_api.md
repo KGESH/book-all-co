@@ -203,7 +203,7 @@ export class CreateSensorDto {
   
   @ApiProperty()  
   @IsString()  
-  public readonly sensorType: string;  
+  public readonly type: string;  
   
   @ApiProperty()  
   @IsNumber()  
@@ -256,7 +256,7 @@ export class SensorsRepository {
     const sensorEntity = {  
       id: this.sensors.length,  
       name: createSensorDto.name,  
-      type: createSensorDto.sensorType,  
+      type: createSensorDto.type,  
       serialNumber: createSensorDto.serialNumber,  
       createdAt: new Date(),  
     };  
@@ -847,19 +847,18 @@ export class TemperaturesController {
 
 
 ### 인프라 관리 (Infrastructure)
-지금까지 우리는 데이터베이스 없이 임시로 메모리(변수)에 데이터를 다뤘습니다. 이제 데이터베이스를 다룰 시간입니다. 핵심 비즈니스 로직을 담당하는 계층과 데이터베이스에 접근하는 계층을 나누었기 때문에 임시 데이터베이스를 실제 데이터베이스로 바꾸는 인프라에 관한 코드만 추가하면 됩니다. 
-그런데 인프라 환경을 한번 생각해 볼 필요가 있습니다. 개발(development) 환경과 실제 고객의 정보를 저장하는 배포(production)환경 모두 같은 데이터베이스를 사용하면 어떻게 될까요? 개발 환경에서는 데이터베이스의 구조가 변경될 일이 자주 발생합니다. 이때 개발자가 실수로 개발에 사용되는 데이터베이스가 아닌, 실제 고객의 정보가 담긴 배포 환경의 데이터베이스에 접근해 고객의 데이터를 전부 날려버리는 일이 발생할 수 있습니다. 이러한 일을 사전에 차단하기 위해 개발 환경의 데이터베이스와 운영 환경의 데이터베이스를 분리해야 합니다. 이러한 환경에 따른 분리 방법으로 Nest에서 환경변수를 관리하는 모듈을 제공합니다.
+잠시 프로젝트 진행을 멈추고 인프라 환경에 대하여 한번 생각해 볼 필요가 있습니다. 만약 개발(development) 환경과 실제 고객의 정보를 저장하는 배포(production)환경 모두 같은 데이터베이스를 사용하면 어떻게 될까요? 개발 환경에서는 데이터베이스의 구조가 변경될 일이 자주 발생합니다. 이때 개발자가 실수로 개발에 사용되는 데이터베이스가 아닌, 실제 고객의 정보가 담긴 배포 환경의 데이터베이스에 접근해 고객의 데이터를 전부 날려버리는 일이 발생할 수 있습니다. 이러한 일을 사전에 차단하기 위해 개발 환경의 데이터베이스와 운영 환경의 데이터베이스를 분리해야 합니다. 이러한 환경에 따른 분리 방법으로 Nest에서 환경변수를 관리하는 모듈을 제공합니다.
 
 
 #### 환경변수 다루기 (Configuration)
 자바스크립트 생태계에서 환경변수를 다루는 방법으로 dotenv (.env)가 주로 사용됩니다. 예를 들어 개발 환경과 배포 환경의 데이터베이스 접속 URL을 다르게 하고 싶다면 여러 변수들을 정의해둔 .env 파일을  NODE_ENV 환경변수에 따라 다르게 불러옵니다.
 
-다음과 같이 dotenv 패키지를 설치하고 2개의 env 파일을 프로젝트 최상단에 작성합니다.
-
+다음과 같이 dotenv 패키지를 설치하고 2개의 .env 파일을 프로젝트 최상단에 작성합니다.
 ```
 npm i dotenv
 ```
 
+#### ..ENV 파일 Git 주의사항 추가 예정
 .env.development
 ```
 DATABASE_HOST=localhost
@@ -988,5 +987,621 @@ bootstrap();
 [그림: 환경변수 주입 결과]
 
 
-#### 데이터베이스 (Database)
-지금까지 우리는 데이터베이스 없이 임시로 메모리(변수)에 데이터를 다뤘습니다. 이제 데이터베이스를 다룰 시간입니다. 핵심 비즈니스 로직을 담당하는 계층과 데이터베이스에 접근하는 계층을 나누었기 때문에 임시 데이터베이스를 실제 데이터베이스로 바꾸는 인프라에 관한 코드만 추가하면 됩니다. 
+### 데이터베이스 (Database)
+지금까지 우리는 데이터베이스 없이 임시로 메모리(변수)에 데이터를 다뤘습니다. 이제 데이터베이스를 다룰 시간입니다. 핵심 비즈니스 로직을 담당하는 계층과 데이터베이스에 접근하는 계층을 나누었기 때문에 임시 데이터베이스를 실제 데이터베이스로 바꾸는 인프라에 관한 코드만 추가하면 됩니다. 그렇다면 실제 데이터베이스에 어떻게 접근해야 할까요?
+
+
+#### ORM (Object Relational Mapping)
+ORM이란 데이터베이스의 관계를 객체로 바꾸어 개발자가 객체지향적인 코드를 더 쉽게 작성하게 도와주는 도구입니다. 객체지향 프로그래밍 언어는 클래스를 사용하고, 데이터베이스는 테이블을 사용하기 때문에, 객체 모델과 관계 모델 간의 불일치가 발생합니다. ORM은 이 문제를 해결하고 개발자가 비즈니스 로직에 더 집중할 수 있게 도와줍니다. 개발자는 ORM에서 제공하는 인터페이스를 통해 SQL 쿼리 작성만이 아닌 메서드를 호출하는 방식으로 데이터베이스를 다룰 수 있습니다.
+이 책에서는 PostgreSQL 데이터베이스와 TypeORM을 사용합니다.
+
+
+#### 개발환경 데이터베이스 설정
+PC에 직접 데이터베이스를 설치해도 되지만, 간편한 설정과 격리된 환경을 위해 도커를 사용해 데이터베이스를 설치하겠습니다. 도커 설치는 챕터 1장이나 공식 문서를 참조하세요.
+
+다음과 같이 터미널에서 도커로 PostgreSQL을 실행합니다.
+```
+docker run -p 5432:5432 --name postgres -e POSTGRES_PASSWORD=mypassword -d postgres
+```
+
+데이터베이스가 실행되고 있는지 확인합니다.
+```
+docker ps
+```
+
+postgres 컨테이너 생성 이후 컨테이너 내부로 들어가서 데이터베이스를 생성해야 합니다. 다음 명령어로 컨테이너 내부로 들어갑니다.
+
+```
+docker exec -it postgres /bin/bash
+```
+
+다음 명령어로 데이터베이스를 생성합니다 데이터베이스의 이름은 .env.development 파일과 동일한 example로 하겠습니다. 비밀번호는 도커 컨테이너를 생성할 때 -e 옵션의 환경변수로 넘겨준 값입니다. 예제의 경우 기본 사용자인 postgres와 비밀번호로 mypassword를 사용했습니다. 이 값들은 이후 사용할 .env.development 파일과 동일해야 합니다.
+```
+root@618d145602a6:/# psql -U postgres
+
+postgres=# CREATE DATABASE example ENCODING 'UTF-8';
+```
+
+
+#### TypeORM 설정
+도커로 데이터베이스 설정을 완료 했다면, 이제 TypeORM을 사용해 백엔드 애플리케이션과 데이터베이스를 연결할 차례입니다.
+
+다음과 같이 터미널에서 패키지들을 설치합니다.
+```
+npm i pg typeorm @nestjs/typeorm
+```
+
+### ...버전 경고 문구 추가 예정
+
+다음과 같이 TypeORM 모듈을 등록합니다. 
+src/app.module.ts
+```
+... 
+import { TypeOrmModule } from '@nestjs/typeorm';  
+  
+@Module({  
+  imports: [  
+	  ...
+    TypeOrmModule.forRoot({  
+      type: 'postgres',  
+      host: 'localhost',  
+      port: 5432,  
+      username: 'postgres',  
+      password: 'mypassword',  
+      database: 'example',  
+      entities: [],  
+      autoLoadEntities: true,  
+      synchronize: true,  
+    }),  
+  ],  
+  ...
+})  
+export class AppModule {}
+```
+
+### ...Synchronize 경고 추가 예정
+
+TypeORM 모듈을 등록하는 과정에서 데이터베이스에 관한 민감한 정보가 포함되어 있습니다. 만약 관리하는 프로젝트가 오픈소스 프로젝트 등 공개되어 있다면 민감한 정보는 코드에 포함되지 않아야 합니다. 다음과 같이 ConfigModule에서 불러온 env 파일의 환경변수들을 사용합니다. 비 동기적으로 ConfigModule이 env 파일을 불러오기 때문에 TypeORM.forRootAsync 메서드를 사용합니다. 이전에 사용한 TypeORM.forRoot 메서드을 사용하는 것과 조금 다른 모습을 볼 수 있습니다.
+
+src/app.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { AppController } from './app.controller';  
+import { AppService } from './app.service';  
+import { SensorsModule } from './sensors/sensors.module';  
+import { ConfigModule, ConfigService } from '@nestjs/config';  
+import * as path from 'path';  
+import { TypeOrmModule } from '@nestjs/typeorm';  
+  
+@Module({  
+  imports: [  
+    ConfigModule.forRoot({  
+      envFilePath: path.join(__dirname, '../', `.env.${process.env.NODE_ENV}`),  
+      isGlobal: true
+    }),  
+    TypeOrmModule.forRootAsync({  
+      imports: [ConfigModule],  
+      inject: [ConfigService],  
+      useFactory: (configService: ConfigService) => {  
+        return {  
+          type: 'postgres',  
+          host: configService.get<string>('DATABASE_HOST'),  
+          port: +configService.get<string>('DATABASE_PORT'),  
+          username: configService.get<string>('DATABASE_USERNAME'),  
+          password: configService.get<string>('DATABASE_PASSWORD'),  
+          database: configService.get<string>('DATABASE_NAME'),  
+          entities: [],  
+          autoLoadEntities: true,  
+          synchronize:  
+            configService.get<string>('DATABASE_SYNCHRONIZE') === 'true'
+        };  
+      },  
+    }),  
+    SensorsModule,  
+  ],  
+  controllers: [AppController],  
+  providers: [AppService],  
+})  
+export class AppModule {}
+```
+
+우선 TypeORM.forRootAsync 메서드 안에서 ConfigModule을 등록해야 합니다. 모듈 등록 이후 사용할 프로바이더를 주입(Inject)을 해줘야 합니다. 우리는 ConfigService를 사용해야 하니 inject 배열에 ConfigService를 등록합니다. 이제 주입받은 환경변수를 통해 팩토리 메서드로 TypeORM이 사용할 설정값들을 생성합니다. 
+
+#### .. auto load entity 설명 추가
+
+forRootAsync 메서드의 옵션을 작성했으니 이제 옵션에 주입될 환경변수를 추가해야 합니다. 다음과 같이 env 파일들을 수정합니다.
+
+.env.development
+```
+DATABASE_HOST=localhost  
+DATABASE_PORT=5432  
+DATABASE_USERNAME=postgres  
+DATABASE_PASSWORD=mypassword  
+DATABASE_NAME=example  
+DATABASE_SYNCHRONIZE=true
+```
+
+.env.production
+```
+DATABASE_HOST=my-production-database-host  
+DATABASE_PORT=5432  
+DATABASE_USERNAME=postgres  
+DATABASE_PASSWORD=mypassword  
+DATABASE_NAME=example  
+DATABASE_SYNCHRONIZE=false
+```
+
+
+#### 온도 엔티티 작성
+이전에 우리가 사용한 센서 엔티티 코드를 봅시다. 
+src/sensors/entities/sensor.entity.ts
+```
+export class Sensor {  
+  id: number;  
+  name: string;  
+  type: string;  
+  serialNumber: number;  
+  createdAt: Date;  
+}
+```
+
+임시로 사용하기엔 손색이 없지만 센서의 타입이 string 타입인 점이 조금 아쉽습니다. string은 실수하기 좋은 타입이기 때문에 센서 타입에 관한 enum을 생성해 타입을 지정해 주겠습니다.
+
+다음과 같이 새로운 파일을 생성하고 enum을 작성합니다.
+src/sensors/entities/sensor.type.ts
+```
+export enum SensorType {  
+  TEMPERATURE = 'temperature',  
+}
+```
+
+센서의 타입을 재정의 했으니 DTO도 바뀌어야 합니다. 다음과 같이 센서 DTO도 수정해줍니다.
+src/sensors/dto/create-sensor.dto.ts
+```
+import { IsEnum, IsNumber, IsString } from 'class-validator';  
+import { ApiProperty } from '@nestjs/swagger';  
+import { SensorType } from '../entities/sensor.type';  
+  
+export class CreateSensorDto {  
+  @ApiProperty() // Swagger에서 API 요청에 필요한 객체의 속성들을 확인하기 위한 데코레이터  
+  @IsString() // Class validator에서 검증할 데코레이터  
+  public readonly name: string;  
+  
+  @ApiProperty({ enum: SensorType })  
+  @IsEnum(SensorType)  
+  public readonly type: SensorType;  
+  
+  @ApiProperty()  
+  @IsNumber()  
+  public readonly serialNumber: number;  
+}
+```
+
+변수에 저장될 때는 객체 그대로여도 상관없었지만, 데이터베이스를 연결하게 되면 객체를 데이터베이스의 엔티티로 변환하는 작업이 필요합니다. 이는 ORM을 통해 쉽게 해결할 수 있습니다.
+다음과 같이 센서 엔티티 클래스를 수정합니다. OneToMany 관계를 작성할 때 에러가 나겠지만 괜찮습니다. 아직 Temperature 엔티티를 작성하지 않아서 생긴 문제입니다. Temperature 엔티티 작성이 완료되면 에러가 사라집니다.
+src/sensors/entities/sensor.entity.ts
+```
+import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, OneToMany } from 'typeorm';  
+import { SensorType } from './sensor.type';  
+import { Temperature } from '../temperatures/entities/temperature.entity';  
+  
+@Entity()  
+export class Sensor {  
+  @PrimaryGeneratedColumn()  
+  id: number;  
+  
+  @Column()  
+  name: string;  
+  
+  @Column({ type: 'enum', enum: SensorType })  
+  type: SensorType;  
+  
+  @Column({ unique: true })  
+  serialNumber: number;  
+  
+  @OneToMany((type) => Temperature, (temperature) => temperature.sensor)  
+  temperatures: Temperature[];  
+  
+  @CreateDateColumn()  
+  createdAt: Date;  
+}
+```
+TypeORM의 데코레이터들은 공식 문서를 통해 자세한 확인이 가능합니다.
+
+
+센서 엔티티 작성을 마치면 온도 엔티티를 작성할 차례입니다. 하나의 센서가 여러개의 온도 데이터를 가지기 때문에 OneToMany, ManyToOne 관계를 설정해주고 센서의 ID 컬럼을 외래키(Foreign key)로 설정해줍니다.
+다음과 같이 온도 엔티티를 작성합니다.
+
+src/sensors/temperatures/entities/temperature.entity.ts
+```
+import {  
+  Column,  
+  CreateDateColumn,  
+  Entity,  
+  JoinColumn,  
+  ManyToOne,  
+  PrimaryGeneratedColumn,  
+} from 'typeorm';  
+import { Sensor } from '../../entities/sensor.entity';  
+  
+@Entity()  
+export class Temperature {  
+  @PrimaryGeneratedColumn()  
+  id: number;  
+  
+  @Column()  
+  sensorId: number;  
+  
+  @Column({ type: 'float' })  
+  temperature: number;  
+  
+  @JoinColumn({ name: 'sensorId', referencedColumnName: 'id' })  
+  @ManyToOne((type) => Sensor, (sensor) => sensor.temperatures)  
+  sensor: Sensor;  
+  
+  @CreateDateColumn()  
+  createdAt: Date;  
+}
+```
+@JoinColumn 데코레이터의 옵션으로 준 name은 실제 데이터베이스 테이블의 컬럼 이름입니다. 엔티티 클래스의 프로퍼티 이름이 아니므로 주의하세요. referencedColumnName은 참조할 key의 이름입니다. 센서 엔티티를 참조하기 위해 센서 엔티티의 ID를 온도 엔티티의 sensorId 컬럼에 추가하는 것입니다.
+
+센서와 온도 엔티티를 수정했으니 임시 데이터베이스를 다루는 리파지토리 클래스들을 수정할 차례입니다. 우선 센서 리파지토리를 다음과 같이 수정합니다.
+src/sensors/sensors.repository.ts
+```
+import { CreateSensorDto } from './dto/create-sensor.dto';  
+import { Injectable } from '@nestjs/common';  
+import { Sensor } from './entities/sensor.entity';  
+import { DataSource } from 'typeorm';  
+  
+@Injectable()  
+export class SensorsRepository {  
+  /** 데이터베이스를 주입 받음 */  
+  constructor(private readonly dataSource: DataSource) {}  
+  
+  async save(createSensorDto: CreateSensorDto): Promise<Sensor> {  
+    const repository = this.dataSource.getRepository(Sensor);  
+  
+    /** 데이터베이스에 저장할 센서 엔티티 생성 */  
+    const sensor = repository.create(createSensorDto);  
+  
+    /** 데이터베이스에 센서 엔티티 저장 시도 */  
+    return repository.save(sensor);  
+  }  
+  
+  async findOneById(sensorId: number): Promise<Sensor> {  
+    return this.dataSource.getRepository(Sensor).findOneBy({ id: sensorId });  
+  }  
+  
+  async findAll(): Promise<Sensor[]> {  
+    return this.dataSource.getRepository(Sensor).find();  
+  }  
+}
+```
+
+
+TypeORM 모듈에 데이터베이스에서 사용할 센서 엔티티를 등록해야 합니다. 다음과 같이 센서 모듈에 TypeORM 모듈을 등록합니다.
+src/sensors/sensors.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { SensorsService } from './sensors.service';  
+import { SensorsController } from './sensors.controller';  
+import { SensorsRepository } from './sensors.repository';  
+import { TemperaturesModule } from './temperatures/temperatures.module';  
+import { TypeOrmModule } from '@nestjs/typeorm';  
+import { Sensor } from './entities/sensor.entity';  
+  
+@Module({  
+  imports: [TypeOrmModule.forFeature([Sensor]), TemperaturesModule],  
+  controllers: [SensorsController],  
+  providers: [SensorsService, SensorsRepository],  
+})  
+export class SensorsModule {}
+```
+
+
+센서 서비스 메서드들의 반환 타입을 다음과 같이 수정합니다. 데이터베이스에 비동기적으로 접근하기 때문에 async 메서드를 사용하며 Promise를 반환합니다. 데이터를 콘솔에 찍어보고 싶다면 await 키워드를 잊지 말고 추가해 주세요.  데이터베이스와 직접 관련된 코드를 서비스와 분리했기 때문에 핵심 로직을 수정하지 않아도 됩니다. 
+#### .. Promise 설명 추가 예정
+src/sensors/sensors.service.ts
+```
+import { BadRequestException, Injectable } from '@nestjs/common';  
+import { CreateSensorDto } from './dto/create-sensor.dto';  
+import { SensorsRepository } from './sensors.repository';  
+import { Sensor } from './entities/sensor.entity';  
+  
+@Injectable()  
+export class SensorsService {  
+  constructor(private readonly sensorsRepository: SensorsRepository) {}  
+  
+  async createSensor(createSensorDto: CreateSensorDto): Promise<Sensor> {  
+    const saveResult = await this.sensorsRepository.save(createSensorDto);  
+    console.log('Created: ', saveResult);  
+  
+    return saveResult;  
+  }  
+  
+  async getSensor(sensorId: number): Promise<Sensor> {  
+    const foundResult = await this.sensorsRepository.findOneById(sensorId);  
+    if (!foundResult) {  
+      throw new BadRequestException('sensor not found!');  
+    }  
+  
+    return foundResult;  
+  }  
+  
+  getAllSensors(): Promise<Sensor[]> {  
+    return this.sensorsRepository.findAll();  
+  }  
+}
+```
+
+
+이제 온도 리파지토리의 코드를 수정하겠습니다. 다음과 같이 온도 리파지토리를 수정합니다. 센서 리파지토리에서는 일반적인 findOneBy 메서드를 사용했지만 다음과 같이 findOneOrFail 메서드를 사용할 수도 있습니다. OrFail이 붙은 메서드는 대상을 찾지 못하면 예외를 던집니다. 상황에 맞는 메서드를 선택해 사용하면 됩니다.
+src/sensors/temperatures/temperatures.repository.ts
+```
+import { BadRequestException, Injectable } from '@nestjs/common';  
+import { Temperature } from './entities/temperature.entity';  
+import { DataSource } from 'typeorm';  
+  
+@Injectable()  
+export class TemperaturesRepository {  
+  /** 데이터베이스를 주입 받음 */  
+  constructor(private readonly dataSource: DataSource) {}  
+  
+  async findBySensorId(sensorId: number): Promise<Temperature> {  
+    try {  
+      return await this.dataSource  
+        .getRepository(Temperature)  
+        .findOneOrFail({ where: { sensorId }, order: { id: 'DESC' } });  
+      // .findOneOrFail({ where: { sensorId }, order: { createdAt: 'DESC' } });  
+    } catch (e) {  
+      throw new BadRequestException(e.message);  
+    }  
+  }  
+  
+  async findTemperaturesByDates(  
+    sensorId: number,  
+    begin: Date,  
+    end: Date,  
+  ): Promise<Temperature[] | null> {  
+    return this.dataSource  
+      .getRepository(Temperature)  
+      .createQueryBuilder()  
+      .select()  
+      .where('sensorId = :sensorId', { sensorId })  
+      .andWhere('createdAt BETWEEN :begin AND :end', { begin, end })  
+      .execute();  
+  }  
+}
+```
+
+
+센서 엔티티를 등록한 것과 마찬가지로 온도 엔티티도 온도 모듈에 등록합니다.
+src/sensors/temperatures/temperatures.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { TemperaturesService } from './temperatures.service';  
+import { TemperaturesController } from './temperatures.controller';  
+import { TemperaturesRepository } from './temperatures.repository';  
+import { TypeOrmModule } from '@nestjs/typeorm';  
+import { Temperature } from './entities/temperature.entity';  
+  
+@Module({  
+  imports: [TypeOrmModule.forFeature([Temperature])],  
+  controllers: [TemperaturesController],  
+  providers: [TemperaturesService, TemperaturesRepository],  
+})  
+export class TemperaturesModule {}
+```
+
+
+온도 서비스에서 이전에 작성했던 임시 데이터베이스의 helper 메서드들을 제거하고 async 메서드로 수정합니다. 온도 저장 기능은 센서가 보낸 온도를 수신할 때 제작하겠습니다.
+src/sensors/temperatures/temperatures.service.ts
+```
+import { Injectable } from '@nestjs/common';  
+import { TemperaturesRepository } from './temperatures.repository';  
+import { Temperature } from './entities/temperature.entity';  
+  
+@Injectable()  
+export class TemperaturesService {  
+  constructor(  
+    private readonly temperaturesRepository: TemperaturesRepository,  
+  ) {}  
+  
+  async getLatestTemperature(sensorId: number): Promise<Temperature> {  
+    return this.temperaturesRepository.findBySensorId(sensorId);  
+  }  
+}
+```
+
+지금까지 많은 코드를 작성했습니다. 이제 데이터베이스가 잘 동작하는지 검증해 볼 시간입니다. 다음과  같이 Swagger에서 API들을 테스트해 봅니다. 우선 데이터베이스에 센서를 생성해 보겠습니다.
+![[sensor_typeorm.png]]
+
+다음과 같이 성공적으로 센서가 생성된 것을 볼 수 있습니다.
+![[sensor_res_typeorm.png]]
+
+방금 생성한 센서를 조회해 봅니다.
+![[sensor_find_typeorm.png]]
+
+다음과 같이 데이터베이스에서 방금 생성한 센서를 확인할 수 있습니다.
+![[sensor_find_res_typeorm.png]]
+
+아직 온도 저장 기능을 추가하지 않았지만 최신 온도 조회 API도 테스트 해봅니다.
+![[temperature_latest_find_typeorm.png]]
+
+다음과 같이 리파지토리의 findOneOrFail 메서드에서 조회에 실패했을 때 우리가 던진 예외를 확인할 수 있습니다.
+![[temperature_late_find_exception_typeorm.png]]
+
+
+축하합니다. 드디어 데이터베이스를 연동하는 긴 여정을 끝냈습니다. 이제 센서가 보낸 MQTT 메시지에서 온도를 받아 데이터베이스에 저장하는 모듈을 만들면 백엔드 기능의 요구사항은 모두 충족하게 됩니다.
+
+
+### NestJS에서 MQTT 통신하기
+현재 우리 백엔드 애플리케이션은 사용자의 요청(Request)에 따른 응답(Response)을 제공합니다. 
+
+```
+npm i mqtt @nestjs/microservices
+```
+
+.env 파일들에 MQTT 브로커의 url을 추가합니다. 배포 환경 url의 경우 챕터1에서 AWS EC2 인스턴스에 MQTT 브로커를 설치했기 때문에 AWS EC2 인스턴스의 탄력적 IP 주소로 설정합니다.
+.env.development
+```
+...
+
+MQTT_BROKER_URL=mqtt:localhost:1883  
+```
+
+.env.production
+```
+...
+
+MQTT_BROKER_URL=mqtt:aws-ec2-public-ip:1883  
+```
+
+CLI에서 MQTT 통신에 사용할 모듈과 서비스를 생성합니다.
+```
+nest g mo mqtt
+nest g s mqtt
+```
+
+다음과 같이 MQTT 클라이언트를 주입받을 토큰을 생성합니다.
+src/mqtt/mqtt.constant.ts
+```
+export const MQTT_CLIENT = 'MQTT_CLIENT';
+```
+
+다음과 같이 MQTT 브로커에 메시지를 '전송'하는 클라이언트를 등록합니다. 주의 해야할 점은 메시지의 '수신'이 아니라 '전송'하는 클라이언트입니다. 메시지의 수신 등록은 이후 main.ts에서 마이크로서비스를 연결할 때 진행합니다.
+src/mqtt/mqtt.module.ts
+```
+import { Module } from '@nestjs/common';  
+import { ClientsModule, Transport } from '@nestjs/microservices';  
+import { ConfigModule, ConfigService } from '@nestjs/config';  
+import { MQTT_CLIENT } from './mqtt.constant';  
+import { MqttService } from './mqtt.service';  
+  
+@Module({  
+  imports: [  
+    ClientsModule.registerAsync([  
+      {  
+        name: MQTT_CLIENT,  
+        imports: [ConfigModule],  
+        inject: [ConfigService],  
+        useFactory: (configService: ConfigService) => {  
+          return {  
+            transport: Transport.MQTT,  
+            options: {  
+              url: configService.get<string>('MQTT_BROKER_URL'),  
+            },  
+          };  
+        },  
+      },  
+    ]),  
+  ],  
+  providers: [MqttService],  
+})  
+export class MqttModule {}
+```
+
+MQTT 서비스에서는 메시지를 전송할 MQTT 클라이언트를 주입받아 사용합니다. 추후에 MQTT 브로커에게 메시지를 전송해야 한다면 MQTT 모듈에서 MQTT서비스를 주입받아 메시지를 전송할 수 있습니다.
+src/mqtt/mqtt.service.ts
+```
+import { Inject, Injectable } from '@nestjs/common';  
+import { MQTT_CLIENT } from './mqtt.constant';  
+import { ClientProxy } from '@nestjs/microservices';  
+import { Observable } from 'rxjs';  
+  
+@Injectable()  
+export class MqttService {  
+  constructor(@Inject(MQTT_CLIENT) private readonly mqttClient: ClientProxy) {}  
+  
+  send(topic: string, payload: unknown): Observable<unknown> {  
+    return this.mqttClient.send(topic, payload);  
+  }  
+}
+```
+
+MQTT 메시지 전송 모듈을 만들었으니, 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다.
+src/main.ts
+```
+...
+
+import { MicroserviceOptions, Transport } from '@nestjs/microservices';  
+  
+async function bootstrap() {  
+  const app = await NestFactory.create(AppModule);  
+  const configService = app.get<ConfigService>(ConfigService);  
+  
+  app.connectMicroservice<MicroserviceOptions>({  
+    transport: Transport.MQTT,  
+    options: {  
+      url: configService.get<string>('MQTT_BROKER_URL'),  
+    },  
+  });  
+  
+  ...
+  
+  await app.startAllMicroservices();  
+  await app.listen(3000);  
+}  
+  
+bootstrap();
+```
+
+MQTT 메시지를 수신할 마이크로서비스 연결 이후, 이전에 작성했던 온도 서비스를 수정합니다. 이전에 작성한 온도 리파지토리의 이름을 temperaturesQueryRepository로 변경하고 새로운 방식으로 온도 리파지토리를 사용해 보겠습니다. 온도 리파지토리 클래스를 직접 작성하지 않고 다음과 같이 주입받아 사용할 수도 있습니다.
+src/sensors/temperatures/temperatures.service.ts
+```
+import { Injectable } from '@nestjs/common';  
+import { TemperaturesRepository } from './temperatures.repository';  
+import { Temperature } from './entities/temperature.entity';  
+import { InjectRepository } from '@nestjs/typeorm';  
+import { Repository } from 'typeorm';  
+  
+@Injectable()  
+export class TemperaturesService {  
+  constructor(  
+    @InjectRepository(Temperature)  
+    private readonly temperaturesRepository: Repository<Temperature>,  
+    private readonly temperaturesQueryRepository: TemperaturesRepository,  
+  ) {}  
+  
+  async saveTemperature(sensorId: number, temperature: number): Promise<Temperature> {  
+    const temperatureEntity = this.temperaturesRepository.create({  
+      sensorId,  
+      temperature,  
+    });  
+  
+    return this.temperaturesRepository.save(temperatureEntity);  
+  }  
+  
+  async getLatestTemperature(sensorId: number): Promise<Temperature> {  
+    return this.temperaturesQueryRepository.findBySensorId(sensorId);  
+  }  
+}
+```
+
+
+온도를 저장하는 메서드를 추가했으니 MQTT 메시지를 수신하는 컨트롤러를 생성합니다.
+src/sensors/temperatures/temperatures-mqtt.controller.ts
+```
+import { Controller } from '@nestjs/common';  
+import { Ctx, MessagePattern, MqttContext, Payload } from '@nestjs/microservices';  
+import { TemperaturesService } from './temperatures.service';  
+  
+@Controller()  
+export class TemperaturesMqttController {  
+  constructor(private readonly temperaturesService: TemperaturesService) {}  
+  
+  // MQTT topic 'temperature/sensorId'  
+  @MessagePattern('temperature/+')  
+  async receiveTemperature(  
+    @Payload() temperature: number,  
+    @Ctx() context: MqttContext,  
+  ) {  
+    const sensorId = parseInt(context.getTopic().split('/')[1]);  
+    await this.temperaturesService.saveTemperature(sensorId, temperature);  
+  }  
+}
+```
+
+
+#### .. MQTT 터미널 결과 사진 추가 예정
+
