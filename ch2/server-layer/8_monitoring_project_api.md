@@ -1279,25 +1279,24 @@ export class SensorsRepository {
 ```
 
 
-TypeORM 모듈에 데이터베이스에서 사용할 센서 엔티티를 등록해야 합니다. 다음과 같이 센서 모듈에 TypeORM 모듈을 등록합니다.
+TypeORM 모듈에 데이터베이스에서 사용할 센서 엔티티를 등록해야 합니다. 다음과 같이 센서 모듈에 TypeORM 모듈을 등록합니다. 센서 엔티티를 등록(import)하고 등록한 TypeORM 모듈을 내보내고(export)있습니다. 이러면 다른 모듈에서 센서 모듈 등록 이후 센서 엔티티를 사용할 수 있습니다.
 src/sensors/sensors.module.ts
 ```
 import { Module } from '@nestjs/common';  
 import { SensorsService } from './sensors.service';  
 import { SensorsController } from './sensors.controller';  
 import { SensorsRepository } from './sensors.repository';  
-import { TemperaturesModule } from './temperatures/temperatures.module';  
 import { TypeOrmModule } from '@nestjs/typeorm';  
 import { Sensor } from './entities/sensor.entity';  
   
 @Module({  
-  imports: [TypeOrmModule.forFeature([Sensor]), TemperaturesModule],  
+  imports: [TypeOrmModule.forFeature([Sensor])],  
   controllers: [SensorsController],  
   providers: [SensorsService, SensorsRepository],  
+  exports: [TypeOrmModule],  
 })  
 export class SensorsModule {}
 ```
-
 
 센서 서비스 메서드들의 반환 타입을 다음과 같이 수정합니다. 데이터베이스에 비동기적으로 접근하기 때문에 async 메서드를 사용하며 Promise를 반환합니다. 데이터를 콘솔에 찍어보고 싶다면 await 키워드를 잊지 말고 추가해 주세요.  데이터베이스와 직접 관련된 코드를 서비스와 분리했기 때문에 핵심 로직을 수정하지 않아도 됩니다. 
 #### .. Promise 설명 추가 예정
@@ -1375,7 +1374,7 @@ export class TemperaturesRepository {
 ```
 
 
-센서 엔티티를 등록한 것과 마찬가지로 온도 엔티티도 온도 모듈에 등록합니다.
+센서 엔티티를 등록한 것과 마찬가지로 온도 엔티티도 온도 모듈에 등록합니다. 추후에 센서 모듈의 엔티티를 사용할 예정이기 때문에 센서 모듈을 등록(import)합니다.
 src/sensors/temperatures/temperatures.module.ts
 ```
 import { Module } from '@nestjs/common';  
@@ -1384,13 +1383,34 @@ import { TemperaturesController } from './temperatures.controller';
 import { TemperaturesRepository } from './temperatures.repository';  
 import { TypeOrmModule } from '@nestjs/typeorm';  
 import { Temperature } from './entities/temperature.entity';  
+import { SensorsModule } from '../sensors.module';  
   
 @Module({  
-  imports: [TypeOrmModule.forFeature([Temperature])],  
+  imports: [SensorsModule, TypeOrmModule.forFeature([Temperature])],  
   controllers: [TemperaturesController],  
   providers: [TemperaturesService, TemperaturesRepository],  
 })  
 export class TemperaturesModule {}
+```
+
+루트 모듈에 온도 모듈 등록을 잊지 마세요.
+src/app.module.ts
+```
+...
+
+import { TemperaturesModule } from './sensors/temperatures/temperatures.module';
+  
+@Module({  
+  imports: [  
+  
+    ...
+    
+    SensorsModule,
+    TemperaturesModule,  
+  ],  
+  
+...
+
 ```
 
 
@@ -1403,9 +1423,7 @@ import { Temperature } from './entities/temperature.entity';
   
 @Injectable()  
 export class TemperaturesService {  
-  constructor(  
-    private readonly temperaturesRepository: TemperaturesRepository,  
-  ) {}  
+  constructor(private readonly temperaturesRepository: TemperaturesRepository) {}  
   
   async getLatestTemperature(sensorId: number): Promise<Temperature> {  
     return this.temperaturesRepository.findBySensorId(sensorId);  
@@ -1442,7 +1460,7 @@ export class TemperaturesService {
 npm i mqtt @nestjs/microservices
 ```
 
-.env 파일들에 MQTT 브로커의 url을 추가합니다. 배포 환경 url의 경우 챕터1에서 AWS EC2 인스턴스에 MQTT 브로커를 설치했기 때문에 AWS EC2 인스턴스의 탄력적 IP 주소로 설정합니다.
+.env 파일들에 MQTT 브로커의 url을 추가합니다. 배포 환경 url의 경우 챕터1에서 AWS EC2 인스턴스에 MQTT 브로커를 설치했기 때문에 AWS EC2 인스턴스의 탄력적 IP 주소로 설정합니다. 만약 로컬 환경에 MQTT 브로커의 설치가 어렵다면 이전에 생성한 AWS EC2의 MQTT 브로커를 사용해 학습을 진행해도 괜찮습니다.
 .env.development
 ```
 ...
@@ -1469,7 +1487,7 @@ src/mqtt/mqtt.constant.ts
 export const MQTT_CLIENT = 'MQTT_CLIENT';
 ```
 
-다음과 같이 MQTT 브로커에 메시지를 '전송'하는 클라이언트를 등록합니다. 주의 해야할 점은 메시지의 '수신'이 아니라 '전송'하는 클라이언트입니다. 메시지의 수신 등록은 이후 main.ts에서 마이크로서비스를 연결할 때 진행합니다.
+다음과 같이 MQTT 브로커에 메시지를 '전송'하는 클라이언트를 등록합니다. MQTT 클라이언트 등록 이후 다른 모듈에서 MQTT 서비스를 사용하기 위해 다시 내보내줍니다(exports). MQTT 서비스를 사용하는 모듈에서 MQTT 모듈을 등록(imports)하면 MQTT 서비스를 주입받아 사용할 수 있습니다. 주의 해야할 점은 메시지의 '수신'이 아니라 '전송'하는 클라이언트입니다. 메시지의 수신 등록은 이후 main.ts에서 마이크로서비스를 연결할 때 진행합니다.
 src/mqtt/mqtt.module.ts
 ```
 import { Module } from '@nestjs/common';  
@@ -1497,11 +1515,12 @@ import { MqttService } from './mqtt.service';
     ]),  
   ],  
   providers: [MqttService],  
+  exports: [MqttService], // 다시 export 해준다
 })  
 export class MqttModule {}
 ```
 
-MQTT 서비스에서는 메시지를 전송할 MQTT 클라이언트를 주입받아 사용합니다. 추후에 MQTT 브로커에게 메시지를 전송해야 한다면 MQTT 모듈에서 MQTT서비스를 주입받아 메시지를 전송할 수 있습니다.
+MQTT 서비스에서는 메시지를 전송할 MQTT 클라이언트를 주입받아 사용합니다.
 src/mqtt/mqtt.service.ts
 ```
 import { Inject, Injectable } from '@nestjs/common';  
@@ -1519,7 +1538,119 @@ export class MqttService {
 }
 ```
 
-MQTT 메시지 전송 모듈을 만들었으니, 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다.
+MQTT 메시지 전송 모듈을 만들었으니 사용해 보겠습니다. 다음과 같이 예시로 사용할 프로토콜과 패킷을 정의합니다. 패킷 클래스는 패킷의 생성과 직렬화를 담당합니다. 작성한 serialize() 메서드를 사용해 패킷을 객체에서 문자열로 직렬화합니다.
+src/mqtt/packet.schema.ts
+```
+/** 예시 프로토콜 */  
+export enum Protocol {  
+  START = 0x23,  
+  READ = 0xc1,  
+  WRITE = 0xd1,  
+  END = 0x0d,  
+}  
+  
+interface PacketSchema {  
+  start: number;  
+  command: number;  
+  target: number;  
+  checksum: number;  
+  end: number;  
+}  
+  
+type BuildSchema = Pick<PacketSchema, 'command' | 'target'>;  
+  
+export class Packet {  
+  private constructor(private readonly packet: PacketSchema) {}  
+  
+  static generateRaw(packetDto: BuildSchema): string {  
+    const checksum = this.getChecksum(packetDto);  
+  
+    return new Packet({  
+      start: Protocol.START,  
+      ...packetDto,  
+      checksum,  
+      end: Protocol.END,  
+    }).serialize();  
+  }  
+  
+  private static getChecksum(packetDto: BuildSchema): number {  
+    return Object.values(packetDto).reduce(  
+      (previous, current) => previous + current,  
+    );  
+  }  
+  
+  private serialize(): string {  
+    return JSON.stringify(this.packet);  
+  }  
+}
+```
+
+센서 모듈에서 MQTT 모듈을 사용하기 위해 다음과 같이 MQTT 모듈을 등록합니다.
+src/sensors/sensors.module.ts
+```
+...
+
+import { MqttModule } from '../mqtt/mqtt.module';  
+  
+@Module({  
+  imports: [MqttModule, TypeOrmModule.forFeature([Sensor])],  
+  
+  ...
+
+```
+
+POST 요청으로 MQTT 메시지 전송을 위해 다음과 같이 DTO를 작성합니다. 예시에서는 간단하게 MQTT 토픽과 명령어와 대상 하드웨어 정도로 작성했습니다. 추후 본인의 프로젝트 진행 상황에 맞게 패킷 클래스와 DTO를 수정하면 됩니다.
+src/sensors/dto/send-mqtt.dto.ts
+```
+import { IsNumber, IsString } from 'class-validator';  
+import { ApiProperty } from '@nestjs/swagger';  
+  
+export class SendMqttDto {  
+  @IsString()  
+  @ApiProperty()  
+  topic: string;  
+  
+  @IsNumber()  
+  @ApiProperty()  
+  command: number;  
+  
+  @IsNumber()  
+  @ApiProperty()  
+  target: number;  
+}
+```
+
+다음과 같이 센서 컨트롤러에 MQTT 서비스를 주입받아 메시지 전송이 가능합니다.
+src/sensors/sensors.controller.ts
+```
+...
+
+import { MqttService } from '../mqtt/mqtt.service';  
+import { Packet } from '../mqtt/packet.schema';  
+import { SendMqttDto } from './dto/send-mqtt.dto';  
+  
+@Controller('sensors')  
+export class SensorsController {  
+  constructor(  
+    private readonly sensorsService: SensorsService,  
+    private readonly mqttService: MqttService,  
+  ) {}  
+  
+  @Post('mqtt/message')  
+  sendMessage(@Body() sendMqttDto: SendMqttDto) {  
+    const { topic, command, target } = sendMqttDto;  
+    const payload = Packet.generateRaw({ target, command });  
+  
+    return this.mqttService.send(topic, payload);  
+  }  
+
+  ...
+}
+```
+
+#### .. MQTT 전송 결과 추가 예정
+
+이번에는 MQTT 메시지를 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다. 분리된 마이크로서비스를 생성하고 마이크로서비스 간의 통신을 할 수도 있지만 분량이 너무 방대해지므로 이 책에서는 다루지 않습니다. 만약 마이크로서비스에 관심이 있다면 공식 문서를 참조하세요. 이 책에서는 하이브리드 애플리케이션을 생성해 MQTT 메시지 수신 예제를 진행합니다.
 src/main.ts
 ```
 ...
@@ -1546,7 +1677,7 @@ async function bootstrap() {
 bootstrap();
 ```
 
-MQTT 메시지를 수신할 마이크로서비스 연결 이후, 이전에 작성했던 온도 서비스를 수정합니다. 이전에 작성한 온도 리파지토리의 이름을 temperaturesQueryRepository로 변경하고 새로운 방식으로 온도 리파지토리를 사용해 보겠습니다. 온도 리파지토리 클래스를 직접 작성하지 않고 다음과 같이 주입받아 사용할 수도 있습니다.
+MQTT 메시지를 수신할 마이크로서비스 연결 이후, 이전에 작성했던 온도 서비스를 수정합니다. 이전에 작성한 온도 리파지토리의 이름을 temperaturesQueryRepository로 변경하고 새로운 방식으로 리파지토리를 사용해 보겠습니다. 리파지토리 클래스를 직접 작성하지 않고 다음과 같이 주입받아 사용할 수도 있습니다.
 src/sensors/temperatures/temperatures.service.ts
 ```
 import { Injectable } from '@nestjs/common';  
@@ -1554,18 +1685,28 @@ import { TemperaturesRepository } from './temperatures.repository';
 import { Temperature } from './entities/temperature.entity';  
 import { InjectRepository } from '@nestjs/typeorm';  
 import { Repository } from 'typeorm';  
+import { Sensor } from '../entities/sensor.entity';  
   
 @Injectable()  
 export class TemperaturesService {  
   constructor(  
+    @InjectRepository(Sensor)  
+    private readonly sensorRepository: Repository<Sensor>,  
     @InjectRepository(Temperature)  
     private readonly temperaturesRepository: Repository<Temperature>,  
     private readonly temperaturesQueryRepository: TemperaturesRepository,  
   ) {}  
   
-  async saveTemperature(sensorId: number, temperature: number): Promise<Temperature> {  
+  async saveTemperature(  
+    serialNumber: number,  
+    temperature: number,  
+  ): Promise<Temperature> {  
+    const sensor = await this.sensorRepository.findOneByOrFail({  
+      serialNumber,  
+    });  
+  
     const temperatureEntity = this.temperaturesRepository.create({  
-      sensorId,  
+      sensor,  
       temperature,  
     });  
   
@@ -1579,7 +1720,7 @@ export class TemperaturesService {
 ```
 
 
-온도를 저장하는 메서드를 추가했으니 MQTT 메시지를 수신하는 컨트롤러를 생성합니다.
+온도를 저장하는 메서드를 추가했으니 MQTT 메시지를 수신하는 컨트롤러를 생성합니다. MQTT 토픽(topic)에서 센서의 시리얼 번호를 추출하여 온도를 저장합니다.
 src/sensors/temperatures/temperatures-mqtt.controller.ts
 ```
 import { Controller } from '@nestjs/common';  
@@ -1590,18 +1731,71 @@ import { TemperaturesService } from './temperatures.service';
 export class TemperaturesMqttController {  
   constructor(private readonly temperaturesService: TemperaturesService) {}  
   
-  // MQTT topic 'temperature/sensorId'  
+  // MQTT topic 'temperature/serial-number'  
   @MessagePattern('temperature/+')  
   async receiveTemperature(  
     @Payload() temperature: number,  
     @Ctx() context: MqttContext,  
   ) {  
-    const sensorId = parseInt(context.getTopic().split('/')[1]);  
-    await this.temperaturesService.saveTemperature(sensorId, temperature);  
+    const sensorSerialNumber = parseInt(context.getTopic().split('/')[1]);  
+    await this.temperaturesService.saveTemperature(  
+      sensorSerialNumber,  
+      temperature,  
+    );  
   }  
 }
 ```
 
 
 #### .. MQTT 터미널 결과 사진 추가 예정
+
+
+#### ... AWS 배포 추가 예정
+
+
+## 웹 클라이언트
+이제 우리의 API가 실제 웹 브라우저에서 작동하는지 확인할 차례입니다. 웹 브라우저에서 작동하는 프론트엔드(frontend) 개발에 React, Vue 등을 사용할 수도 있지만 이 책의 영역을 넘어가기 때문에 프론트엔드 스택에 대해서는 다루지 않습니다. 예제에서는 간단하게 HTML과 JavaScript를 사용해 사용자 계층을 구현하겠습니다.
+
+index.html
+```
+<!DOCTYPE html>  
+<html lang="en">  
+<head>  
+  <meta charset="UTF-8">  
+  <title>Temperature Example</title>  
+</head>  
+<body>  
+  <h1>온도 모니터링 프론트엔드</h1>  
+  <h2>최근 온도</h2>  
+  <p id="temperature">unknown</p>  
+<script src="index.js"></script>  
+</body>  
+</html>
+```
+
+
+다음과 같이 웹 브라우저에서 주기적으로 센서의 최근 온도를 요청하는 코드를 작성합니다.
+index.js
+```
+const API_URL = 'http://localhost:3000';  
+  
+const temperatureText = document.getElementById('temperature');  
+const fetchLatestTemperature = () => {  
+  const latestTemperaturesApiUrl = `${API_URL}/sensors/8/temperatures/latest`;  
+  return fetch(latestTemperaturesApiUrl)  
+    .then((res) => res.json())  
+    .then((res) => (temperatureText.innerText = res.temperature))  
+    .catch((e) => {  
+      console.log(e);  
+    });  
+};  
+  
+setInterval(fetchLatestTemperature, 2000);
+```
+
+
+#### .. CORS 설명
+
+
+
 
