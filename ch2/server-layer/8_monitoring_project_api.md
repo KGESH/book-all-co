@@ -880,7 +880,7 @@ package.json
 ...
 ```
 
-만약 Windows 운영체제라면 다음과 같이 cross-env 패키지를 설치해서 환경변수를 주입합니다. cross-env는 운영체제에 관계없이 통일된 방법으로 환경변수를 주입합니다.
+만약 Windows 운영체제라면 다음과 같이 cross-env 패키지를 설치해서 환경변수를 주입합니다. cross-env는 운영체제에 관계없이 환경변수 주입을 도와주는 도구입니다.
 ```
 npm i -D cross-env
 ```
@@ -1650,7 +1650,7 @@ export class SensorsController {
 
 #### .. MQTT 전송 결과 추가 예정
 
-이번에는 MQTT 메시지를 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다. 분리된 마이크로서비스를 생성하고 마이크로서비스 간의 통신을 할 수도 있지만 분량이 너무 방대해지므로 이 책에서는 다루지 않습니다. 만약 마이크로서비스에 관심이 있다면 공식 문서를 참조하세요. 이 책에서는 하이브리드 애플리케이션을 생성해 MQTT 메시지 수신 예제를 진행합니다.
+이번에는 MQTT 메시지를 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다. 분리된 마이크로서비스를 생성하고 마이크로서비스 간의 통신을 할 수도 있지만 분량이 너무 방대해지므로 이 책에서는 다루지 않습니다. 만약 마이크로서비스에 관심이 있다면 공식 문서를 참조하세요. 이 책에서는 기존 앱에 마이크로서비스를 연결하는 하이브리드 애플리케이션 방식으로 MQTT 메시지 수신 예제를 진행합니다.
 src/main.ts
 ```
 ...
@@ -1750,7 +1750,7 @@ export class TemperaturesMqttController {
 #### .. MQTT 터미널 결과 사진 추가 예정
 
 
-#### ... AWS 배포 추가 예정
+
 
 
 ## 웹 클라이언트
@@ -1794,8 +1794,105 @@ setInterval(fetchLatestTemperature, 2000);
 ```
 
 
+
 #### .. CORS 설명
 
 
+
+
+
+#### AWS에 백엔드 배포하기
+이제 백엔드 애플리케이션을 AWS EC2에 배포할 차례입니다. 이 책에서는 간단하게 로컬 PC에서 이미지 빌드, 도커 허브(Docker hub)에 push, 배포할 EC2에 직접 접속해서 이미지를 pull하는 방식으로 진행하겠습니다. Github Actions, AWS ECR, AWS CodePipeline 등을 통해 파이프라인을 구축할 수도 있지만 책의 범위를 벗어나므로 테스트, 배포 자동화에 관심이 있다면 CI / CD 파이프라인에 대하여 따로 알아보기를 추천드립니다.
+
+우선 도커 허브(Docker hub)의 계정을 생성해야합니다. 다음과 같이 도커 허브 계정을 생성합니다.
+
+#### ... 도커 허브 계정 생성, 이미지 저장소 설명 추가 예정
+
+생성한 public 이미지 저장소는 추후 백엔드 이미지가 저장될 공간입니다.
+다음과 같이 프로젝트 루트 디렉토리에 도커파일(Dockerfile)을 작성합니다. src 디렉토리 내부가 아닙니다. 주의하세요.
+Dockerfile
+```
+# Step 1 build  
+  
+FROM node:14 AS builder  
+  
+WORKDIR /app  
+  
+COPY . .  
+  
+RUN npm install  
+  
+RUN npm run build  
+  
+  
+# Step 2 use build image  
+FROM node:14-alpine  
+  
+WORKDIR /app  
+  
+COPY --from=builder /app ./  
+  
+EXPOSE 3000  
+  
+CMD ["npm", "run", "start:prod"]
+
+```
+
+
+도커파일 작성 이후 다음과 같이 package.json에 이미지 빌드와 배포 명령어를 작성합니다. 이전에 생성한 도커 허브 public repository에 push 명령어를 확인할 수 있습니다.  다음과 같이 tagname만 latest로 수정합니다. 또한 태그를 지정하지 않으면 자동으로 latest 태그가 적용됩니다. docker build 명령어의 .(도커파일 경로)을 잊지 말고 작성해 주세요. 만약 M1 Mac을 사용 중이라면 빌드 시 --platform linux/amd64 옵션을 지정해 주어야 합니다.
+package.json
+```
+...
+"scripts": {  
+	...
+  "start:dev": "cross-env NODE_ENV=development nest start --watch",
+  "start:prod": "cross-env NODE_ENV=production node dist/main",
+  "start:docker-build": "docker build -t username/reponame:latest --platform linux/amd64 .",
+  "start:docker-deploy": "docker push username/reponame",
+	...
+},
+
+...
+```
+Windows 사용자가 아니라면 스크립트의 cross-env 옵션을 제거해도 됩니다.
+
+스크립트 작성 이후 다음과 같이 백엔드 애플리케이션을 도커 이미지로 빌드합니다.
+```
+npm run start:docker-build
+```
+
+이미지 빌드가 완료되면 다음과 같이 도커 허브에 이미지를 배포합니다.
+```
+npm run start:docker-deploy
+```
+
+
+다음과 같이 도커 허브에서 push한 이미지를 확인할 수 있습니다. 이제 도커 허브에 저장된 이미지를 EC2 인스턴스에서 내려받아(pull) 실행하기만 하면 됩니다. 이 책에서는 EC2 인스턴스에 직접 접속해서 도커허브의 public 이미지를 내려받겠습니다. private repository나 AWS ECR을 이용하는 방법은 이 책에서 다루지 않습니다. 
+#### ... 도커 허브 push 결과 이미지 추가 예정
+
+
+
+### EC2에서 도커 이미지 불러오기
+도커 허브에 백엔드 애플리케이션 이미지를 저장했으니 실제 애플리케이션이 작동할 서버에서 해당 이미지를 가져와(pull) 실행해야 합니다. 이전에 EC2에 도커를 설치할 때처럼 다시 EC2 인스턴스에 접속합니다.
+
+EC2 인스턴스에 접속 후 다음과 같이 배포한 백엔드 애플리케이션을 pull 합니다.
+```
+docker pull username/reponame
+```
+
+다음 명령어로 이미지를 가져왔는지 확인할 수 있습니다.
+```
+docker images
+```
+
+다음과 같이 가져온 이미지를 실행합니다. --name 옵션은 컨테이너의 이름을 지정합니다. 이 책에서는 iot-monitoring 이라는 이름을 사용하겠습니다. -d 옵션은 컨테이너를 백그라운드에서 실행하는 옵션입니다.
+```
+docker run -d --name iot-monitoring username/reponame
+```
+
+다음과 같이 실행 중인 컨테이너들을 확인할 수 있습니다.
+```
+docker ps
+```
 
 

@@ -4,16 +4,35 @@
     "type": "split",
     "children": [
       {
-        "id": "14a94af056605013",
-        "type": "leaf",
-        "state": {
-          "type": "markdown",
-          "state": {
-            "file": "ch2/server-layer/8_monitoring_project_api.md",
-            "mode": "preview",
-            "source": false
+        "id": "e7c61f8f349b1f2c",
+        "type": "tabs",
+        "children": [
+          {
+            "id": "152c26443784a3e2",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "ch1/6_broker_setup.md",
+                "mode": "preview",
+                "source": false
+              }
+            }
+          },
+          {
+            "id": "00f56ce71ede746b",
+            "type": "leaf",
+            "state": {
+              "type": "markdown",
+              "state": {
+                "file": "ch1/7_database_setup.md",
+                "mode": "source",
+                "source": false
+              }
+            }
           }
-        }
+        ],
+        "currentTab": 1
       }
     ],
     "direction": "vertical"
@@ -32,7 +51,9 @@
             "pinned": true,
             "state": {
               "type": "file-explorer",
-              "state": {},
+              "state": {
+                "sortOrder": "alphabetical"
+              },
               "pinned": true
             }
           },
@@ -79,7 +100,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md",
+                "file": "ch1/7_database_setup.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -96,7 +117,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md",
+                "file": "ch1/7_database_setup.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -119,7 +140,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md"
+                "file": "ch1/7_database_setup.md"
               }
             }
           }
@@ -130,17 +151,20 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "14a94af056605013",
+  "ribbon": {
+    "mostRecentAction": ""
+  },
+  "active": "00f56ce71ede746b",
   "lastOpenFiles": [
-    "ch2/server-layer/7_hello_nestjs.md",
-    "ch2/server-layer/5_nestjs_setup.md",
-    "ch2/server-layer/4_nestjs_introduce.md",
-    "ch2/server-layer/3_tech_required.md",
-    "ch3/hw-layer/4_iot_gateway_implement.md",
+    "ch1/4_aws_setup.md",
+    "ch1/7_database_setup.md",
+    "ch1/6_broker_setup.md",
+    "ch1/3_mqtt_practice.md",
+    "ch1/2_mqtt_introduce.md",
+    "ch1/1_system_introduce.md",
+    "Untitled.md",
     "ch2/server-layer/8_monitoring_project_api.md",
-    "ch3/hw-layer/2_iot_gateway_introduce.md",
-    "ch3/hw-layer/1_hw_layer.md",
-    "ch2/server-layer/6_nestjs_tutorial.md",
-    "ch1/6_broker_setup.md"
+    "ch1/5_docker_setup.md",
+    "ch2/server-layer/7_hello_nestjs.md"
   ]
 }
