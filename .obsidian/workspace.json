@@ -13,26 +13,13 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "ch1/6_broker_setup.md",
-                "mode": "preview",
-                "source": false
-              }
-            }
-          },
-          {
-            "id": "00f56ce71ede746b",
-            "type": "leaf",
-            "state": {
-              "type": "markdown",
-              "state": {
                 "file": "ch1/7_database_setup.md",
                 "mode": "source",
                 "source": false
               }
             }
           }
-        ],
-        "currentTab": 1
+        ]
       }
     ],
     "direction": "vertical"
@@ -154,17 +141,17 @@
   "ribbon": {
     "mostRecentAction": ""
   },
-  "active": "00f56ce71ede746b",
+  "active": "152c26443784a3e2",
   "lastOpenFiles": [
     "ch2/server-layer/8_monitoring_project_api.md",
     "ch1/7_database_setup.md",
     "ch1/6_broker_setup.md",
+    "ch1/5_docker_setup.md",
     "ch1/4_aws_setup.md",
     "ch1/3_mqtt_practice.md",
-    "ch1/5_docker_setup.md",
-    "ch2/server-layer/6_nestjs_tutorial.md",
-    "ch2/server-layer/1_server_layer.md",
-    "ch1/2_mqtt_introduce.md",
-    "ch1/1_system_introduce.md"
+    "ch2/server-layer/5_nestjs_setup.md",
+    "ch2/server-layer/4_nestjs_introduce.md",
+    "ch1/1_system_introduce.md",
+    "ch1/2_mqtt_introduce.md"
   ]
 }

@@ -56,7 +56,7 @@ sudo docker images
 ```
 
 ### sudo 명령 없이 docker 사용하기
-docker 명령어 실행 시 sudo 권한이 필요합니다. 만약 sudo 명령어 없이 docker 명령어를 실행하면 권한 에러 메시지가 발생합니다. 학습 시 일일이 sudo 명령어를 입력하기 귀찮다면 다음 명령어를 실행하고 서버를 재시작하면 sudo 명령어를 붙이지 않고 학습을 진행할 수 있습니다.
+docker 명령어 실행 시 sudo 권한이 필요합니다. 만약 sudo 명령어 없이 docker 명령어를 실행하면 권한 에러 메시지가 발생합니다. 학습 시 일일이 sudo 명령어를 입력하기 싫다면 다음 명령어를 실행하고 서버를 재시작하면 sudo 명령어를 붙이지 않고 학습을 진행할 수 있습니다.
 ```
 sudo usermod -aG docker $USER
 ```
