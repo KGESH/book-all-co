@@ -1487,7 +1487,7 @@ src/mqtt/mqtt.constant.ts
 export const MQTT_CLIENT = 'MQTT_CLIENT';
 ```
 
-다음과 같이 MQTT 브로커에 메시지를 '전송'하는 클라이언트를 등록합니다. MQTT 클라이언트 등록 이후 다른 모듈에서 MQTT 서비스를 사용하기 위해 다시 내보내줍니다(exports). MQTT 서비스를 사용하는 모듈에서 MQTT 모듈을 등록(imports)하면 MQTT 서비스를 주입받아 사용할 수 있습니다. 주의 해야할 점은 메시지의 '수신'이 아니라 '전송'하는 클라이언트입니다. 메시지의 수신 등록은 이후 main.ts에서 마이크로서비스를 연결할 때 진행합니다.
+다음과 같이 MQTT 브로커에 메시지를 '전송'하는 클라이언트를 등록합니다. name에 이전에 생성한 토큰을 등록하면 이후 클래스의 프로퍼티에 직접 주입할 수 있습니다. MQTT 클라이언트 등록 이후 다른 모듈에서 MQTT 서비스를 사용하기 위해 다시 내보내줍니다(exports). MQTT 서비스를 사용하는 모듈에서 MQTT 모듈을 등록(imports)하면 MQTT 서비스를 주입받아 사용할 수 있습니다. 주의 해야할 점은 메시지의 '수신'이 아니라 '전송'하는 클라이언트입니다. 메시지의 수신 등록은 이후 main.ts에서 마이크로서비스를 연결할 때 진행합니다.
 src/mqtt/mqtt.module.ts
 ```
 import { Module } from '@nestjs/common';  
@@ -1520,7 +1520,7 @@ import { MqttService } from './mqtt.service';
 export class MqttModule {}
 ```
 
-MQTT 서비스에서는 메시지를 전송할 MQTT 클라이언트를 주입받아 사용합니다.
+MQTT 서비스에서는 메시지를 전송할 MQTT 클라이언트를 주입받아 사용합니다. 이전에 name에 등록한 토큰으로 해당 프로바이더를 주입할 수 있습니다.
 src/mqtt/mqtt.service.ts
 ```
 import { Inject, Injectable } from '@nestjs/common';  
@@ -1797,10 +1797,6 @@ setInterval(fetchLatestTemperature, 2000);
 
 #### .. CORS 설명
 
-
-
-
-
 #### AWS에 백엔드 배포하기
 이제 백엔드 애플리케이션을 AWS EC2에 배포할 차례입니다. 이 책에서는 간단하게 로컬 PC에서 이미지 빌드, 도커 허브(Docker hub)에 push, 배포할 EC2에 직접 접속해서 이미지를 pull하는 방식으로 진행하겠습니다. Github Actions, AWS ECR, AWS CodePipeline 등을 통해 파이프라인을 구축할 수도 있지만 책의 범위를 벗어나므로 테스트, 배포 자동화에 관심이 있다면 CI / CD 파이프라인에 대하여 따로 알아보기를 추천드립니다.
 
@@ -1839,7 +1835,7 @@ CMD ["npm", "run", "start:prod"]
 ```
 
 
-도커파일 작성 이후 다음과 같이 package.json에 이미지 빌드와 배포 명령어를 작성합니다. 이전에 생성한 도커 허브 public repository에 push 명령어를 확인할 수 있습니다.  다음과 같이 tagname만 latest로 수정합니다. 또한 태그를 지정하지 않으면 자동으로 latest 태그가 적용됩니다. docker build 명령어의 .(도커파일 경로)을 잊지 말고 작성해 주세요. 만약 M1 Mac을 사용 중이라면 빌드 시 --platform linux/amd64 옵션을 지정해 주어야 합니다.
+도커파일 작성 이후 다음과 같이 package.json에 이미지 빌드와 배포 명령어를 작성합니다. 이전에 생성한 도커 허브 public repository에 push 명령어를 확인할 수 있습니다.  다음과 같이 tagname만 latest로 수정합니다. 또한 태그를 지정하지 않으면 자동으로 latest 태그가 적용됩니다. docker build 명령어의 "."을 잊지 말고 작성해 주세요. 도커파일 경로를 지정해야 합니다. 만약 M1 Mac을 사용 중이라면 빌드 시 --platform linux/amd64 옵션을 지정해 주어야 합니다.
 package.json
 ```
 ...
@@ -1871,7 +1867,6 @@ npm run start:docker-deploy
 #### ... 도커 허브 push 결과 이미지 추가 예정
 
 
-
 ### EC2에서 도커 이미지 불러오기
 도커 허브에 백엔드 애플리케이션 이미지를 저장했으니 실제 애플리케이션이 작동할 서버에서 해당 이미지를 가져와(pull) 실행해야 합니다. 이전에 EC2에 도커를 설치할 때처럼 다시 EC2 인스턴스에 접속합니다.
 
@@ -1885,9 +1880,28 @@ docker pull username/reponame
 docker images
 ```
 
-다음과 같이 가져온 이미지를 실행합니다. --name 옵션은 컨테이너의 이름을 지정합니다. 이 책에서는 iot-monitoring 이라는 이름을 사용하겠습니다. -d 옵션은 컨테이너를 백그라운드에서 실행하는 옵션입니다.
+이전에 도커 컴포즈로 MQTT 브로커를 실행하기 위해 생성한 docker-compose.yml 파일을 다음과 같이 수정합니다. 서비스의 이름은 backend로 지정하겠습니다. 백엔드 애플리케이션에서 mosquitto 서비스에 접근하기 위해 links 옵션으로 mosquitto 서비스를 지정합니다. links 옵션은 해당 컨테이너를 연결해 주는 옵션입니다. 더 자세한 내용은 도커 컴포즈 공식 문서를 참조하세요.
 ```
-docker run -d --name iot-monitoring username/reponame
+version: "3"  
+services:  
+  mosquitto:  
+    image: eclipse-mosquitto  
+    ports:  
+      - "1883:1883"  
+    volumes:  
+      - ~/mosquitto:/mosquitto/  
+
+  backend:  
+    image: baram987/iot-monitoring  
+    ports:  
+      - "3000:3000"  
+    links:  
+      - mosquitto
+```
+
+도커 컴포즈 파일을 수정하고 컨테이너들을 실행합니다.
+```
+docker-compose -f ~/docker-compose.yml up -d
 ```
 
 다음과 같이 실행 중인 컨테이너들을 확인할 수 있습니다.
@@ -1896,3 +1910,5 @@ docker ps
 ```
 
 
+
+## .. 추가 작성 예정 

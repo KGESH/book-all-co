@@ -156,15 +156,15 @@
   },
   "active": "00f56ce71ede746b",
   "lastOpenFiles": [
-    "ch1/4_aws_setup.md",
+    "ch2/server-layer/8_monitoring_project_api.md",
     "ch1/7_database_setup.md",
     "ch1/6_broker_setup.md",
+    "ch1/4_aws_setup.md",
     "ch1/3_mqtt_practice.md",
-    "ch1/2_mqtt_introduce.md",
-    "ch1/1_system_introduce.md",
-    "Untitled.md",
-    "ch2/server-layer/8_monitoring_project_api.md",
     "ch1/5_docker_setup.md",
-    "ch2/server-layer/7_hello_nestjs.md"
+    "ch2/server-layer/6_nestjs_tutorial.md",
+    "ch2/server-layer/1_server_layer.md",
+    "ch1/2_mqtt_introduce.md",
+    "ch1/1_system_introduce.md"
   ]
 }
