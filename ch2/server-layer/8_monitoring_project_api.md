@@ -1453,7 +1453,7 @@ export class TemperaturesService {
 npm i mqtt @nestjs/microservices
 ```
 
-.env 파일들에 MQTT 브로커의 url을 추가합니다. 배포 환경 url의 경우 챕터1에서 AWS EC2 인스턴스에 MQTT 브로커를 설치했기 때문에 AWS EC2 인스턴스의 탄력적 IP 주소로 설정합니다. 만약 로컬 환경에 MQTT 브로커의 설치가 어렵다면 이전에 생성한 AWS EC2의 MQTT 브로커를 사용해 학습을 진행해도 괜찮습니다.
+.env 파일들에 MQTT 브로커의 url을 추가합니다. 배포 환경 url의 경우 챕터1에서 AWS EC2 인스턴스에 MQTT 브로커를 설치했습니다. 본인의 EC2 인스턴스의 탄력적 IP 주소로 설정합니다. 만약 로컬 환경에 MQTT 브로커의 설치가 어렵다면 이전에 생성한 AWS EC2의 MQTT 브로커를 사용해 학습을 진행해도 괜찮습니다.
 .env.development
 ```
 ...
@@ -1465,7 +1465,7 @@ MQTT_BROKER_URL=mqtt:localhost:1883
 ```
 ...
 
-MQTT_BROKER_URL=mqtt:aws-ec2-public-ip:1883  
+MQTT_BROKER_URL=mqtt:13.209.227.236:1883  
 ```
 
 CLI에서 MQTT 통신에 사용할 모듈과 서비스를 생성합니다.

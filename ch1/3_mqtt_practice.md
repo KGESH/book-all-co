@@ -1,6 +1,33 @@
 # MQTT 실습
 
-로컬 환경에서 MQTT 브로커와 클라이언트를 설치해 MQTT 통신을 실습합니다. Widnows 10, Linux, Mac 설치 방법이 각각 다르니 자세한 내용은 링크(https://mosquitto.org/download)를 참조합니다.
+로컬 환경에서 MQTT 브로커와 클라이언트를 설치해 MQTT 통신을 실습합니다. Widnows 10, Mac, Linux 설치 방법이 각각 다르니 자세한 내용은 링크(https://mosquitto.org/download)를 참조합니다.
+
+## Windows 설치 방법
+다음 링크(https://mosquitto.org/download)에서 본인 시스템(64bit, 32bit)에 맞는 설치 파일을 다운로드합니다. 설치 경로를 기억해두세요. 설치후 명령 프롬프트(cmd)에서 설치 경로로 이동하여 실습 진행 예정입니다.
+![[resources/ch1/3/4.png]]
+# ... 추가 작성 예정
+
+![[resources/ch1/3/5.png]]
+
+![[resources/ch1/3/6.png]]
+
+![[resources/ch1/3/7.png]]
+
+![[resources/ch1/3/8.png]]
+
+처음 설치후, 서비스를 시작해야합니다. 키보드의 윈도우 단축키 또는 작업 표시줄 검색창에 서비스를 검색합니다.
+![[resources/ch1/3/9.png]]
+
+Mosquitto Broker 또는 mosquitto 서비스를 찾아 시작합니다.
+![[resources/ch1/3/10.png]]
+
+서비스 시작 이후 2개의 명령 프롬프트(cmd) 창을 킵니다. 각각 cd 명령어로 이전에 설정한 mosquitto 설치 경로로 이동합니다. 제 설치 경로는 다음과 같습니다.
+```
+cd C:\Program Files\mosquitto
+```
+![[resources/ch1/3/11.png]]
+
+
 
 ## Mac 설치 방법
 Mac의 패키지 매니저인 home brew를 통해 설치할 수 있습니다.
@@ -31,14 +58,8 @@ sudo systemctl status mosquitto.service
 ```
 
 
-## Windows 설치 방법
-다음 링크(https://mosquitto.org/download)에서 본인 시스템(64bit, 32bit)에 맞는 설치 파일을 다운로드합니다.
-# ... 추가 작성 예정
-
-
-
-
-실습을 위해 mosquitto 클라이언트를 사용해 토픽을 구독 & 발행 합니다.
+## 실습
+설치 이후 mosquitto 클라이언트를 사용해 토픽을 구독 & 발행 합니다.
 
 ### Subscribe (구독)
 ```
