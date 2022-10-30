@@ -67,7 +67,7 @@ mosquitto_sub -h localhost -p 1883 -t company/floor2/toilet
 ```
 ![[resources/ch1/3/1.png]]
 
-### Publish (발행)
+### Publish (발행) 
 ```
 mosquitto_pub -h localhost -p 1883 -t company/floor2/toilet -m "hello"
 ```
