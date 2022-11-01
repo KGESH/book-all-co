@@ -51,10 +51,10 @@ http://localhost:3000 에 접속해서 [그림 : Nest 모니터링 앱 접속 �
 
 
 ## Resources
-우리가 정의할 API는 REST API 입니다. (... REST API 설명) 터미널에 [그림 : Nest 모니터링 앱 리소스 생성] 같이 NestJS의 CLI 명령어를 입력합니다.
+우리가 정의할 API는 REST API 입니다. (... REST API 설명) 터미널에 [그림 : Nest 모니터링 앱 리소스 생성] 같이 NestJS의 CLI 명령어를 입력합니다. --no-spec 옵션은 단위 테스트 파일을 자동 생성하지 않겠다는 의미입니다. 이 책에서 소프트웨어 테스트는 다루지 않습니다. 하지만 따로 시간을 내어 소프트웨어 테스트에 관하여 공부하는 것을 추천드립니다.
 
 ```
-nest generate resource sensors
+nest generate resource sensors --no-spec
 ```
 
 ![[nest_g_sensors_1.png]]
@@ -230,7 +230,7 @@ export class Sensor {
 
 센서 서비스 클래스에 임시 데이터베이스 변수를 만들 수도 있지만, 센서 서비스 클래스가 오직 비즈니스 로직의 책임을 지게 하기 위해 데이터를 저장하는 클래스를 새로 생성하겠습니다. 이번에는 CLI를 사용하지 않고 직접 sensors.repository.ts 파일을 생성 하겠습니다. 파일의 경로는 src/sensors/sensors.repository.ts 입니다.
 
-다음과 같이 데이터베이스 역할을 할 센서 리파지토리 클래스를 작성합니다. 앞서 설명한 것처럼 데이터베이스 연동법을 아직 모르기때문에 메모리(변수) 데이터베이스 역할을 할 sensors배열을 생성합니다. 데이터 생성 요청마다 자동으로 id를 생성하고 시간까지 저장하는 sensorEntity 객체를 배열에 push하는 saveSensor 메소드, 데이터베이스에서 센서의 id로 조회하는 findOneById 메소드, 데이터베이스의 모든 센서들을 반환하는 findAll 메소드를 작성합니다. 그리고 @Injectable() 데코레이터를 빼먹지 않고 반드시 작성해주세요! @Injectable() 데코레이터는 잠시후 Provider에서 설명합니다.
+다음과 같이 데이터베이스 역할을 할 센서 리파지토리 클래스를 작성합니다. 앞서 설명한 것처럼 데이터베이스 연동법을 아직 모르기때문에 메모리(변수) 데이터베이스 역할을 할 sensors배열을 생성합니다. 데이터 생성 요청마다 자동으로 id를 생성하고 시간까지 저장하는 sensorEntity 객체를 배열에 push하는 saveSensor 메소드, 시리얼 번호로 조회하는 findOneBySerialNumber 메소드, 센서의 id로 조회하는 findOneById 메소드, 모든 센서들을 반환하는 findAll 메소드를 작성합니다. 그리고 @Injectable() 데코레이터를 빼먹지 않고 반드시 작성해주세요! @Injectable() 데코레이터는 잠시후 Provider에서 설명합니다.
 
 src/sensors/sensors.repository.ts
 ```
@@ -238,7 +238,7 @@ import { CreateSensorDto } from './dto/create-sensor.dto';
 import { Injectable } from '@nestjs/common';  
 import { Sensor } from './entities/sensor.entity';  
   
-@Injectable()  
+@Injectable()  /** Injectable 데코레이터 반드시 작성 */  
 export class SensorsRepository {  
   /** 임시 데이터베이스 역할 배열 */  
   private sensors: Sensor[] = [  
@@ -251,7 +251,7 @@ export class SensorsRepository {
     },  
   ];  
   
-  save(createSensorDto: CreateSensorDto): Sensor {  
+  async save(createSensorDto: CreateSensorDto): Promise<Sensor> {  
     /** 임시 데이터베이스에 저장할 센서 객체 */  
     const sensorEntity = {  
       id: this.sensors.length,  
@@ -262,21 +262,28 @@ export class SensorsRepository {
     };  
   
     this.sensors.push(sensorEntity);  
-    return sensorEntity;  
+    return Promise.resolve(sensorEntity);
+  }
+
+
+  async findOneBySerialNumber(serialNumber: number): Promise<Sensor> {  
+    const foundSensor = this.sensors.filter((sensor) => sensor.serialNumber === serialNumber);  
+	return Promise.resolve(foundSensor);
   }  
   
-  findOneById(sensorId: number): Sensor {  
-    return this.sensors[sensorId];  
+  async findOneById(sensorId: number): Promise<Sensor> {  
+	const foundSensor = this.sensors[sensorId];
+    return Promise.resolve(foundSensor);
   }  
   
-  findAll(): Sensor[] {  
-    return this.sensors;  
+  async findAll(): Promise<Sensor[]> {  
+    return Promise.resolve(this.sensors);  
   }  
 }
 
 ```
 
-데이터베이스의 책임을 가진 센서 리파지토리를 생성했습니다. 이제 비즈니스 로직의 책임을 가진 센서 서비스로 이동해서 CLI가 생성한 템플릿 코드를 지우고 다음과 같이 작성합니다. 센서 생성을 위한 createSensor 메소드, 저장된 모든 센서를 가져오는 getAllSensors 메소드, 센서의 id로 데이터베이스를 조회하는 getSensor 메소드까지 총 3개의 메소드를 작성합니다. getSensor 메소드에서는 데이터베이스에 저장된 센서가 없다면 BadRequestException 예외를 던져서 사용자에게 센서를 찾지 못했다고 메시지를 전달합니다.
+데이터베이스의 책임을 가진 센서 리파지토리를 생성했습니다. 이제 비즈니스 로직의 책임을 가진 센서 서비스로 이동해서 CLI가 생성한 템플릿 코드를 지우고 다음과 같이 작성합니다. 센서 생성을 위한 createSensor 메소드, 저장된 모든 센서를 가져오는 getAllSensors 메소드, 센서의 시리얼 번호로 데이터베이스를 조회하는 getSensorBySerialNumber 메소드까지 총 3개의 메소드를 작성합니다. getSensorBySerialNumber 메소드에서는 데이터베이스에 저장된 센서가 없다면 BadRequestException 예외를 던져서 사용자에게 센서를 찾지 못했다고 메시지를 전달합니다.
 
 src/sensors/sensors.service.ts
 ```
@@ -289,15 +296,15 @@ import { Sensor } from './entities/sensor.entity';
 export class SensorsService {  
   constructor(private readonly sensorsRepository: SensorsRepository) {}  
   
-  createSensor(createSensorDto: CreateSensorDto): Sensor {  
-    const saveResult = this.sensorsRepository.save(createSensorDto);  
+  async createSensor(createSensorDto: CreateSensorDto): Promise<Sensor> {  
+    const saveResult = await this.sensorsRepository.save(createSensorDto);  
     console.log('Created: ', saveResult);  
   
     return saveResult;  
   }  
   
-  getSensor(sensorId: number): Sensor {  
-    const foundResult = this.sensorsRepository.findOneById(sensorId);  
+  async getSensorBySerialNumber(serialNumber: number): Promise<Sensor> {  
+    const foundResult = await this.sensorsRepository.findOneBySerialNumber(serialNumber);  
     if (!foundResult) {  
       throw new BadRequestException('sensor not found!');  
     }  
@@ -305,7 +312,7 @@ export class SensorsService {
     return foundResult;  
   }  
   
-  getAllSensors(): Sensor[] {  
+  getAllSensors(): Promise<Sensor[]> {  
     return this.sensorsRepository.findAll();  
   }  
 }
@@ -334,10 +341,10 @@ export class SensorsController {
     return this.sensorsService.getAllSensors();  
   }  
   
-  @Get(':id')  
-  getSensor(@Param('id') sensorId: number) {  
-    return this.sensorsService.getSensor(parseInt(sensorId));
-  }  
+  @Get(':serial')  
+  getSensor(@Param('serial') serialNumber: string) {  
+    return this.sensorsService.getSensorBySerialNumber(parseInt(serialNumber));  
+  }
 }
 ```
 
@@ -347,7 +354,6 @@ export class SensorsController {
 [그림 : 센서 리파지토리 에러]
 
 일단 Nest에서 제안하는 대로 센서 모듈을 살펴봅시다.
-
 src/sensors/sensors.module.ts
 ```
 import { Module } from '@nestjs/common';  
@@ -364,7 +370,6 @@ export class SensorsModule {}
 
 providers 배열에 센서 서비스가 등록 되어있는것을 확인할 수 있습니다. 센서 서비스 클래스위에 @Injectable() 데코레이터를 기억하시나요? 우리가 데이터 계층을 다룰때 사용하는 센서 리파지토리를 작성할때 까먹지말고 @Injectable() 데코레이터도 작성하라고 했습니다. @Injectable() 데코레이터는 해당 클래스를 Nest의 DI(dependency injection)컨테이너가 관리하는 주입(inject) 가능한 프로바이더(provider)로 만들어줍니다. 이 키워드들이 이해가 되지 않아도 괜찮습니다. 이후 provider를 설명할 때 같이 설명합니다. 다음 코드처럼 센서 리파지토리도 센서 서비스처럼 providers 배열에 등록하고 서버를 재실행 해보면 성공적으로 서버가 재실행 됩니다. 이제 우리는 @Injectable() 데코레이터가 붙은 클래스는 모듈의 프로바이더 배열에 등록하여 사용해야한다는 것을 배웠습니다.
 그렇다면 provider는 대체 무엇일까요?
-
 src/sensors/sensors.module.ts
 ```
 import { Module } from '@nestjs/common';  
@@ -688,11 +693,11 @@ bootstrap();
 
 온도 센서를 임시 데이터베이스에 생성했으니 이제 온도 데이터를 조회하는 API를 생성합니다. 이전과 마찬가지로 아직 데이터베이스 연동하는 방법을 배우지 않았으니 임시 데이터베이스 역할을 할 변수를 사용하겠습니다. CLI에서 다음 명령어로 센서 디렉토리 내부에 온도 모듈과 서비스를 생성합니다.
 ```
-nest g mo sensors/temperatures
+nest g mo sensors/temperatures --no-spec
 ```
 
 ```
-nest g s sensors/temperatures
+nest g s sensors/temperatures --no-spec
 ```
 
 CLI로 모듈을 생성하면 Nest는 해당 모듈을 사용할 수 있도록 자동으로 구성요소들을 등록해줍니다. CLI를 통해 모듈과 서비스를 생성했다면 temperatures.module.ts 는 다음과 같이 작성됩니다. providers 배열에 온도 서비스가 자동으로 등록된 것을 확인할 수 있습니다.
@@ -711,13 +716,11 @@ export class TemperaturesModule {}
 [그림 : Nest 모니터링 앱 구조_2] 는 온도 모듈 생성 이후 디렉토리 구조입니다.
 
 
-
 ![[tree_2.png]]
 [그림 : Nest 모니터링 앱 구조_2]
 
 
 이전에 센서 리파지토리를 생성한 것처럼 이번에도 온도를 저장하는 책임을 가진 온도 리파지토리를 생성하겠습니다. 우선 데이터베이스에 저장될 온도 엔티티를 작성합니다. 다음과 같이 src/sensors/temperatures/entities 디렉토리를 생성하고 내부에 temperature.entity.ts 파일을 생성합니다.
-
 src/sensors/temperatures/temperature.entity.ts
 ```
 export class Temperature {  
@@ -728,8 +731,7 @@ export class Temperature {
 }
 ```
 
-온도 엔티티 생성 이후 src/sensors/temperatures 디렉토리 내부에 temperatures.repository.ts 파일을 생성하고 다음과 같이 온도 리파지토리 클래스를 작성합니다. 이전과 마찬가지로 꼭 @Injectable() 데코레이터를 작성해주세요!
-
+온도 엔티티 생성 이후 src/sensors/temperatures 디렉토리 내부에 temperatures.repository.ts 파일을 생성하고 다음과 같이 온도 리파지토리 클래스를 작성합니다. 지금은 데이터베이스를 적용하지 않기 때문에 간단한 helper 메서드를 만들어 요구사항을 구현합니다. 이전과 마찬가지로 꼭 @Injectable() 데코레이터를 작성해주세요!
 src/sensors/temperatures/temperatures.repository.ts
 ```
 import { Injectable } from '@nestjs/common';  
@@ -744,40 +746,24 @@ export class TemperaturesRepository {
     { id: 2, sensorId: 0, temperature: 23, createdAt: new Date('2022/01/03') },  
     { id: 3, sensorId: 0, temperature: 24, createdAt: new Date('2022/01/04') },  
   ];  
-  
-  findBySensorId(sensorId: number): Temperature[] {  
-    return this.temperatures.filter((column) => column.sensorId === sensorId);  
-  }  
-}
-```
-
-센서의 id로 데이터베이스에 저장되어 있는 온도 데이터들을 가져오는 기능을 추가했습니다. findBySensorId 메서드는 센서의 id를 받아 해당 센서가 저장한 모든 온도 데이터들을 조회하는 기능을 가집니다. 이후 데이터베이스를 적용해도 매개변수 타입과 리턴 타입이 변하지 않으므로 서비스 계층의 코드를 수정할 일이 없습니다.
 
 
-
-다음과 같이 온도 서비스에 센서 id로 조회한 데이터들 중 가장 최근 데이터를  찾는 기능을 추가합니다. 지금은 데이터베이스를 적용하지 않기 때문에 간단한 helper 메서드를 만들어 요구사항을 구현합니다. 데이터베이스 적용 이후 임시 메서드는 제거하고 해당 책임은 데이터베이스에 위임합니다.
-
-src/sensors/temperatures/temperatures.service.ts
-```
-import { BadRequestException, Injectable } from '@nestjs/common';  
-import { TemperaturesRepository } from './temperatures.repository';  
-import { Temperature } from './entities/temperature.entity';  
-  
-@Injectable()  
-export class TemperaturesService {  
-  constructor(  
-    private readonly temperaturesRepository: TemperaturesRepository,  
-  ) {}  
-  
-  getLatestTemperature(sensorId: number): Temperature {  
-    const temperatures = this.temperaturesRepository.findBySensorId(sensorId);  
+  async findLatest(sensorId: number): Promise<Temperautre> {
+    const temperatures = await this.findBySensorId(sensorId);
     if (this.isEmpty(temperatures)) {  
       throw new BadRequestException('Temperatures not found!');  
-    }  
+    }
+
+	const latest = temperatures.reduce(this.getLatest);
+    return Promise.resolve(latest);  
+  }
   
-    return temperatures.reduce(this.getLatest);  
+  private async findBySensorId(sensorId: number): Promise<Temperature[]> {  
+    const foundTemperatures = this.temperatures.filter((column) => column.sensorId === sensorId);
+    return Promise.resolve(foundTemperatures);  
   }  
   
+  /** 데이터베이스 사용전 임시 helper 메서드 */  
   private isEmpty(temperatures: Temperature[]): boolean {  
     return temperatures.length === 0;  
   }  
@@ -788,17 +774,44 @@ export class TemperaturesService {
   }  
 }
 ```
+센서의 id로 데이터베이스에 가장 최근 저장되어 있는 온도 데이터 조회 기능을 추가했습니다. 이후 데이터베이스를 적용해도 매개변수 타입과 리턴 타입이 변하지 않으므로 서비스 계층의 코드를 수정할 일이 없습니다.
+
+
+다음과 같이 온도 서비스를 작성합니다. 이전에 작성한 센서 리파지토리와 온도 데이터베이스에 질의(query)할 리파지토리를 사용합니다.
+src/sensors/temperatures/temperatures.service.ts
+```
+import { BadRequestException, Injectable } from '@nestjs/common';  
+import { SensorsRepository } from '../sensors.repository';
+import { TemperaturesRepository } from './temperatures.repository';  
+import { Temperature } from './entities/temperature.entity';  
+
+@Injectable()  
+export class TemperaturesService {  
+  constructor(
+    private readonly sensorRepository: SensorsRepository,
+    private readonly temperaturesQueryRepository: TemperaturesRepository,  
+  ) {}  
+  
+  async getLatestTemperature(serialNumber: number): Promise<Temperature> {
+    const sensor = await this.sensorRepository.findOneBySerialNumber(serialNumber);  
+	if (!sensor) {  
+	  throw new BadRequestException('sensor not found!');  
+	}
+	
+    return await this.temperaturesQueryRepository.findLatest(sensor.id);  
+  }  
+}
+```
 
 
 온도 데이터를 조회하는 서비스를 작성했으니 다음과 같이 CLI로 온도 컨트롤러를 생성합니다.
 
 ```
-nest g co sensors/temperatures
+nest g co sensors/temperatures --no-spec
 ```
 
 
-다음과 같이 온도 모듈 클래스에 자동으로 등록된 컨트롤러를 확인하고 이전에 생성한 온도 리파지토리도 프로바이더에 등록합니다.
-
+다음과 같이 온도 모듈 클래스에 자동으로 등록된 컨트롤러를 확인하고 서비스에서 사용한 온도 리파지토리와 센서 모듈을 등록합니다.
 src/sensors/temperatures/temperatures.module.ts
 ```
 import { Module } from '@nestjs/common';  
@@ -806,7 +819,8 @@ import { TemperaturesService } from './temperatures.service';
 import { TemperaturesController } from './temperatures.controller';  
 import { TemperaturesRepository } from './temperatures.repository';  
   
-@Module({  
+@Module({
+  imports: [SensorsModule],
   controllers: [TemperaturesController],  
   providers: [TemperaturesService, TemperaturesRepository],  
 })  
@@ -821,16 +835,16 @@ src/sensors/temperatures/temperatures.controller.ts
 import { Controller, Get, Param } from '@nestjs/common';  
 import { TemperaturesService } from './temperatures.service';  
   
-/** 센서의 id를 식별하기 위한 파라미터 */  
-@Controller('sensors/:id/temperatures')  
+/** 센서의 시리얼 번호를 식별하기 위한 파라미터 */  
+@Controller('sensors/:serial/temperatures')  
 export class TemperaturesController {  
   constructor(private readonly temperaturesService: TemperaturesService) {}  
   
   @Get('latest')  
   getLatestTemperature(  
-    @Param('id') sensorId: string /** 컨트롤러의 id 파라미터를 가져온다 */,  
+    @Param('serial') serialNumber: string /** 컨트롤러의 serial 파라미터를 가져온다 */,  
   ) {  
-    return this.temperaturesService.getLatestTemperature(parseInt(sensorId));  
+    return this.temperaturesService.getLatestTemperature(parseInt(serialNumber));  
   }  
 }
 ```
@@ -1261,8 +1275,8 @@ export class SensorsRepository {
     return repository.save(sensor);  
   }  
   
-  async findOneById(sensorId: number): Promise<Sensor> {  
-    return this.dataSource.getRepository(Sensor).findOneBy({ id: sensorId });  
+  async findOneBySerialNumber(serialNumber: number): Promise<Sensor> {
+    return this.dataSource.getRepository(Sensor).findOneBy({ serialNumber });
   }  
   
   async findAll(): Promise<Sensor[]> {  
@@ -1291,43 +1305,8 @@ import { Sensor } from './entities/sensor.entity';
 export class SensorsModule {}
 ```
 
-센서 서비스 메서드들의 반환 타입을 다음과 같이 수정합니다. 데이터베이스에 비동기적으로 접근하기 때문에 async 메서드를 사용하며 Promise를 반환합니다. 데이터를 콘솔에 찍어보고 싶다면 await 키워드를 잊지 말고 추가해 주세요.  데이터베이스와 직접 관련된 코드를 서비스와 분리했기 때문에 핵심 로직을 수정하지 않아도 됩니다. 
-#### .. Promise 설명 추가 예정
-src/sensors/sensors.service.ts
-```
-import { BadRequestException, Injectable } from '@nestjs/common';  
-import { CreateSensorDto } from './dto/create-sensor.dto';  
-import { SensorsRepository } from './sensors.repository';  
-import { Sensor } from './entities/sensor.entity';  
-  
-@Injectable()  
-export class SensorsService {  
-  constructor(private readonly sensorsRepository: SensorsRepository) {}  
-  
-  async createSensor(createSensorDto: CreateSensorDto): Promise<Sensor> {  
-    const saveResult = await this.sensorsRepository.save(createSensorDto);  
-    console.log('Created: ', saveResult);  
-  
-    return saveResult;  
-  }  
-  
-  async getSensor(sensorId: number): Promise<Sensor> {  
-    const foundResult = await this.sensorsRepository.findOneById(sensorId);  
-    if (!foundResult) {  
-      throw new BadRequestException('sensor not found!');  
-    }  
-  
-    return foundResult;  
-  }  
-  
-  getAllSensors(): Promise<Sensor[]> {  
-    return this.sensorsRepository.findAll();  
-  }  
-}
-```
 
-
-이제 온도 리파지토리의 코드를 수정하겠습니다. 다음과 같이 온도 리파지토리를 수정합니다. 센서 리파지토리에서는 일반적인 findOneBy 메서드를 사용했지만 다음과 같이 findOneOrFail 메서드를 사용할 수도 있습니다. OrFail이 붙은 메서드는 대상을 찾지 못하면 예외를 던집니다. 상황에 맞는 메서드를 선택해 사용하면 됩니다.
+이제 온도 리파지토리의 코드를 수정하겠습니다. 이전에 작성한 helper 메서드들을 제거하고 해당 책임을 데이터베이스에 위임합니다. 또한 날짜 범위가 주어지면 해당 기간 동안의 온도 데이터를 조회하는 기능도 추가합니다. 센서 리파지토리에서는 일반적인 findOneBy 메서드를 사용했지만 다음과 같이 findOneOrFail 메서드를 사용할 수도 있습니다. OrFail이 붙은 메서드는 대상을 찾지 못하면 예외를 던집니다. 상황에 맞는 메서드를 선택해 사용하면 됩니다.
 src/sensors/temperatures/temperatures.repository.ts
 ```
 import { BadRequestException, Injectable } from '@nestjs/common';  
@@ -1339,12 +1318,12 @@ export class TemperaturesRepository {
   /** 데이터베이스를 주입 받음 */  
   constructor(private readonly dataSource: DataSource) {}  
   
-  async findBySensorId(sensorId: number): Promise<Temperature> {  
+  async findLatest(sensorId: number): Promise<Temperature> {  
     try {  
       return await this.dataSource  
         .getRepository(Temperature)  
         .findOneOrFail({ where: { sensorId }, order: { id: 'DESC' } });  
-      // .findOneOrFail({ where: { sensorId }, order: { createdAt: 'DESC' } });  
+      // .findOneOrFail({ where: { sensorId }, order: { createdAt: 'DESC' } });  예제에서 같은 결과
     } catch (e) {  
       throw new BadRequestException(e.message);  
     }  
@@ -1407,23 +1386,6 @@ import { TemperaturesModule } from './sensors/temperatures/temperatures.module';
 ```
 
 
-온도 서비스에서 이전에 작성했던 임시 데이터베이스의 helper 메서드들을 제거하고 async 메서드로 수정합니다. 온도 저장 기능은 센서가 보낸 온도를 수신할 때 제작하겠습니다.
-src/sensors/temperatures/temperatures.service.ts
-```
-import { Injectable } from '@nestjs/common';  
-import { TemperaturesRepository } from './temperatures.repository';  
-import { Temperature } from './entities/temperature.entity';  
-  
-@Injectable()  
-export class TemperaturesService {  
-  constructor(private readonly temperaturesRepository: TemperaturesRepository) {}  
-  
-  async getLatestTemperature(sensorId: number): Promise<Temperature> {  
-    return this.temperaturesRepository.findBySensorId(sensorId);  
-  }  
-}
-```
-
 지금까지 많은 코드를 작성했습니다. 이제 데이터베이스가 잘 동작하는지 검증해 볼 시간입니다. 다음과  같이 Swagger에서 API들을 테스트해 봅니다. 우선 데이터베이스에 센서를 생성해 보겠습니다.
 ![[sensor_typeorm.png]]
 
@@ -1441,9 +1403,7 @@ export class TemperaturesService {
 
 다음과 같이 리파지토리의 findOneOrFail 메서드에서 조회에 실패했을 때 우리가 던진 예외를 확인할 수 있습니다.
 ![[temperature_late_find_exception_typeorm.png]]
-
-
-축하합니다. 드디어 데이터베이스를 연동하는 긴 여정을 끝냈습니다. 이제 센서가 보낸 MQTT 메시지에서 온도를 받아 데이터베이스에 저장하는 모듈을 만들면 백엔드 기능의 요구사항은 모두 충족하게 됩니다.
+축하합니다. 드디어 데이터베이스를 연동하는 긴 여정을 끝냈습니다. 데이터베이스를 변경한다는 엄청난 수정사항에도 불구하고 서비스 계층의 코드를 건드리지 않고 요구사항을 충족시켰습니다. 해당 예제로 계층을 나누었을 때 얻는 장점을 확인할 수 있습니다. 이제 센서가 보낸 MQTT 메시지에서 온도를 받아 데이터베이스에 저장하는 모듈을 만들면 백엔드 기능의 요구사항은 모두 충족하게 됩니다.
 
 
 ### NestJS에서 MQTT 통신하기
@@ -1844,7 +1804,7 @@ package.json
 ...
 ```
 
-스크립트 작성 이후 다음과 같이 백엔드 애플리케이션을 도커 이미지로 빌드합니다.
+스크립트 작성 이후 다음과 같이 백엔드 애플리케이션을 도커 이미지로 빌드 합니다. 도커 이미지를 빌드 하기 전에 도커 엔진을 실행해야 합니다.
 ```
 npm run start:docker-build
 ```
@@ -1902,5 +1862,9 @@ docker ps
 ```
 
 
+컨테이너 실행 확인 이후 센서가 온도 데이터를 전송하는 시나리오를 연출해 보겠습니다. 다음과 같이 로컬 환경에서 온도 토픽을 발행합니다.
+```
+mosquitto_pub -t 
+```
 
 ## .. 추가 작성 예정 
