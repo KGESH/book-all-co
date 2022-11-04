@@ -51,7 +51,7 @@ http://localhost:3000 에 접속해서 [그림 : Nest 모니터링 앱 접속 �
 
 
 ## Resources
-우리가 정의할 API는 REST API 입니다. (... REST API 설명) 터미널에 [그림 : Nest 모니터링 앱 리소스 생성] 같이 NestJS의 CLI 명령어를 입력합니다. --no-spec 옵션은 단위 테스트 파일을 자동 생성하지 않겠다는 의미입니다. 이 책에서 소프트웨어 테스트는 다루지 않습니다. 하지만 따로 시간을 내어 소프트웨어 테스트에 관하여 공부하는 것을 추천드립니다.
+우리가 정의할 API는 REST API 입니다. (... REST API 설명) 터미널에 [그림 : Nest 모니터링 앱 리소스 생성] 같이 NestJS의 CLI 명령어를 입력합니다. --no-spec 옵션은 단위 테스트 파일을 생성하지 않는 옵션입니다. 이 책에서 소프트웨어 테스트는 다루지 않습니다. 하지만 따로 시간을 내어 소프트웨어 테스트에 관하여 공부하는 것을 추천드립니다.
 
 ```
 nest generate resource sensors --no-spec
@@ -1603,7 +1603,11 @@ export class SensorsController {
 
 #### .. MQTT 전송 결과 추가 예정
 
-이번에는 MQTT 메시지를 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다. 분리된 마이크로서비스를 생성하고 마이크로서비스 간의 통신을 할 수도 있지만 분량이 너무 방대해지므로 이 책에서는 다루지 않습니다. 만약 마이크로서비스에 관심이 있다면 공식 문서를 참조하세요. 이 책에서는 기존 앱에 마이크로서비스를 연결하는 하이브리드 애플리케이션 방식으로 MQTT 메시지 수신 예제를 진행합니다.
+이번에는 MQTT 메시지를 수신하는 방법을 알아보겠습니다. 다음과 같이 main.ts에서 기존 앱에 MQTT 메시지를 수신하는 마이크로서비스를 연결합니다. 분리된 마이크로서비스를 생성하고 마이크로서비스 간의 통신을 할 수도 있지만 분량이 너무 방대해지므로 이 책에서는 다루지 않습니다. 만약 마이크로서비스에 관심이 있다면 공식 문서를 참조하세요. 이 책에서는 기존 앱에 마이크로서비스를 연결하는 하이브리드 애플리케이션 방식으로 MQTT 메시지 수신 예제를 진행합니다. 또한 프론트엔드(웹 브라우저)의 요청을 처리하기 위해 enableCors() 메서드를 실행합니다. 
+
+#### 알나지 CORS 추가 예정
+
+
 src/main.ts
 ```
 ...
@@ -1613,7 +1617,8 @@ import { MicroserviceOptions, Transport } from '@nestjs/microservices';
 async function bootstrap() {  
   const app = await NestFactory.create(AppModule);  
   const configService = app.get<ConfigService>(ConfigService);  
-  
+
+  app.enableCors();
   app.connectMicroservice<MicroserviceOptions>({  
     transport: Transport.MQTT,  
     options: {  
@@ -1673,7 +1678,7 @@ export class TemperaturesService {
 ```
 
 
-온도를 저장하는 메서드를 추가했으니 MQTT 메시지를 수신하는 컨트롤러를 생성합니다. MQTT 토픽(topic)에서 센서의 시리얼 번호를 추출하여 온도를 저장합니다.
+온도를 저장하는 메서드를 추가했으니 MQTT 메시지를 수신하는 컨트롤러를 생성합니다. MQTT 토픽(topic)에서 센서의 시리얼 번호를 추출하여 온도를 저장합니다. @Payload() 데코레이터는 수신한 MQTT 토픽의 메시지(payload)를 가져옵니다. @Ctx() 데코레이터는 MQTT 토픽의 컨텍스트를 가져옵니다. 해당 컨텍스트에서 토픽이나 바이트 패킷(raw packet)을 가져올 수 있습니다.
 src/sensors/temperatures/temperatures-mqtt.controller.ts
 ```
 import { Controller } from '@nestjs/common';  
@@ -1691,23 +1696,26 @@ export class TemperaturesMqttController {
     @Ctx() context: MqttContext,  
   ) {  
     const sensorSerialNumber = parseInt(context.getTopic().split('/')[1]);  
-    await this.temperaturesService.saveTemperature(  
+    const saveResult = await this.temperaturesService.saveTemperature(  
       sensorSerialNumber,  
       temperature,  
     );  
+  
+    console.log(saveResult);  
   }  
 }
 ```
 
 
-#### .. MQTT 터미널 결과 사진 추가 예정
-
-
-
-
 
 ## 웹 클라이언트
-이제 우리의 API가 실제 웹 브라우저에서 작동하는지 확인할 차례입니다. 웹 브라우저에서 작동하는 프론트엔드(frontend) 개발에 React, Vue 등을 사용할 수도 있지만 이 책의 영역을 넘어가기 때문에 프론트엔드 스택에 대해서는 다루지 않습니다. 예제에서는 간단하게 HTML과 JavaScript를 사용해 사용자 계층을 구현하겠습니다.
+이제 우리의 API가 실제 웹 브라우저에서 작동하는지 확인할 차례입니다. 웹 브라우저에서 작동하는 프론트엔드(frontend) 개발에 React, Vue 등을 사용할 수도 있지만 이 책의 영역을 넘어가기 때문에 프론트엔드 기술 스택에 대해서는 다루지 않습니다. 예제에서는 간단하게 HTML과 JavaScript를 사용해 사용자 계층을 구현하겠습니다.
+
+다음과 같이 index.html 파일을 작성합니다. 파일 위치는 어디든 상관 없습니다. 웹 브라우저에서 사용할 기능은 다음과 같습니다.
+1. 입력 칸에 센서의 시리얼 번호를 입력합니다. 
+2. 입력된 시리얼 번호로 센서를 생성합니다.
+3. 입력된 시리얼 번호로 최근 온도를 주기적으로 조회합니다.
+4. 입력된 시리얼 번호로 날짜 범위의 온도를 조회합니다.
 
 index.html
 ```
@@ -1715,40 +1723,106 @@ index.html
 <html lang="en">  
 <head>  
   <meta charset="UTF-8">  
-  <title>Temperature Example</title>  
+  <title>IoT Example</title>  
 </head>  
 <body>  
-  <h1>온도 모니터링 프론트엔드</h1>  
-  <h2>최근 온도</h2>  
-  <p id="temperature">unknown</p>  
-<script src="index.js"></script>  
+  <h1>온도 모니터링 예제 프론트엔드</h1>  
+  <div>    
+	<span>시리얼 번호: </span>  
+    <input id="serial-input" placeholder="1234" />  
+    <button id="create-button">센서 생성</button>  
+    <button id="latest-button">최근 온도 조회</button>  
+  </div>  
+  <div>    
+	<input id="begin-input" placeholder="2022/01/01" />  
+    <input id="end-input" placeholder="2022/01/07" />  
+    <button id="between-button">범위 온도 조회</button>  
+  </div>  
+  <p>최근 온도: <span id="latest">unknown</span></p>  
+  <p>생성된 센서: <span id="created">unknown</span></p>  
+  <ul id="between-list"></ul>  
+<script>  
+  let fetchInterval;  
+  const API_URL = "http://localhost:3000";  
+  const serialInput = document.getElementById("serial-input");  
+  const beginInput = document.getElementById("begin-input");  
+  const endInput = document.getElementById("end-input");  
+  const createButton = document.getElementById("create-button");  
+  const latestButton = document.getElementById("latest-button");  
+  const betweenButton = document.getElementById("between-button");  
+  const latestText = document.getElementById("latest");  
+  const createText = document.getElementById("created");  
+  const betweenUl = document.getElementById("between-list");  
+  
+  const createSensor = async () => {  
+    const url = `${API_URL}/sensors`;  
+    const serialNumber = serialInput.value;  
+    const newSensor = {  
+      name: "example",  
+      type: "temperature",  
+      serialNumber  
+    };  
+  
+    const created = await fetch(url, {  
+      method: "POST",  
+      headers: { "Content-Type": "application/json" },  
+      body: JSON.stringify(newSensor)  
+    }).then(res => res.json());  
+  
+    createText.innerText = JSON.stringify(created);  
+  };  
+  
+  const fetchBetween = async () => {  
+    betweenUl.innerHTML = "";  
+    const serialNumber = serialInput.value;  
+    const url = new URL(`${API_URL}/sensors/${serialNumber}/temperatures`);  
+    const params = { begin: beginInput.value, end: endInput.value };  
+    url.search = new URLSearchParams(params);  
+  
+    const entities = await fetch(url).then(res => res.json());  
+    entities.forEach(entity => {  
+      const li = document.createElement("li");  
+      const textNode = document.createTextNode(JSON.stringify(entity));  
+      li.appendChild(textNode);  
+      betweenUl.appendChild(li);  
+    });  
+  };  
+  
+  const fetchLatest = async (serialNumber) => {  
+    const url = `${API_URL}/sensors/${serialNumber}/temperatures/latest`;  
+    const latest = await fetch(url).then(res => res.json());  
+  
+    latestText.innerText = latest.temperature;  
+  };  
+  
+  const setFetchInterval = () => {  
+    if (fetchInterval) {  
+      clearInterval(fetchInterval);  
+    }  
+  
+    const serialNumber = serialInput.value;  
+    fetchInterval = setInterval(() => fetchLatest(serialNumber), 2000);  
+  };  
+  
+  latestButton.addEventListener("click", setFetchInterval);  
+  betweenButton.addEventListener("click", fetchBetween);  
+  createButton.addEventListener("click", createSensor);  
+  
+</script>  
 </body>  
 </html>
 ```
 
+먼저 센서를 생성하고 센서 생성 결과를 확인합니다. 센서 생성 이후 MQTT 클라이언트에서 센서의 시리얼 번호를 사용해 온도 토픽을 발행 합니다.
+![[frontend_example.png]]
+[그림: 프론트엔드_예제]
 
-다음과 같이 웹 브라우저에서 주기적으로 센서의 최근 온도를 요청하는 코드를 작성합니다.
-index.js
+다음과 같이 MQTT 클라이언트에서 생성된 센서의 시리얼 번호로 온도 토픽을 발행합니다. 발행 이후 프론트엔드에서 온도 데이터의 저장 결과를 확인할 수 있습니다.
 ```
-const API_URL = 'http://localhost:3000';  
-  
-const temperatureText = document.getElementById('temperature');  
-const fetchLatestTemperature = () => {  
-  const latestTemperaturesApiUrl = `${API_URL}/sensors/8/temperatures/latest`;  
-  return fetch(latestTemperaturesApiUrl)  
-    .then((res) => res.json())  
-    .then((res) => (temperatureText.innerText = res.temperature))  
-    .catch((e) => {  
-      console.log(e);  
-    });  
-};  
-  
-setInterval(fetchLatestTemperature, 2000);
+mosquitto_pub -h localhost -t temperature/1234 -m 22.2 
 ```
 
 
-
-#### .. CORS 설명
 
 #### AWS에 백엔드 배포하기
 이제 백엔드 애플리케이션을 AWS EC2에 배포할 차례입니다. 이 책에서는 간단하게 로컬 PC에서 이미지 빌드, 도커 허브(Docker hub)에 push, 배포할 EC2에 직접 접속해서 이미지를 pull하는 방식으로 진행하겠습니다. Github Actions, AWS ECR, AWS CodePipeline 등을 통해 파이프라인을 구축할 수도 있지만 책의 범위를 벗어나므로 테스트, 배포 자동화에 관심이 있다면 CI / CD 파이프라인에 대하여 따로 알아보기를 추천드립니다.
@@ -1756,7 +1830,6 @@ setInterval(fetchLatestTemperature, 2000);
 우선 도커 허브(Docker hub)의 계정을 생성해야합니다. 다음과 같이 도커 허브 계정을 생성합니다.
 
 #### ... 도커 허브 계정 생성, 이미지 저장소 설명 추가 예정
-
 생성한 public 이미지 저장소는 추후 백엔드 이미지가 저장될 공간입니다.
 다음과 같이 프로젝트 루트 디렉토리에 도커파일(Dockerfile)을 작성합니다. src 디렉토리 내부가 아닙니다. 주의하세요.
 Dockerfile
@@ -1833,6 +1906,7 @@ docker images
 ```
 
 이전에 도커 컴포즈로 MQTT 브로커를 실행하기 위해 생성한 docker-compose.yml 파일을 다음과 같이 수정합니다. 서비스의 이름은 backend로 지정하겠습니다. 백엔드 애플리케이션에서 mosquitto 서비스에 접근하기 위해 links 옵션으로 mosquitto 서비스를 지정합니다. links 옵션은 해당 컨테이너를 연결해 주는 옵션입니다. 더 자세한 내용은 도커 컴포즈 공식 문서를 참조하세요.
+docker-compose.yml
 ```
 version: "3"  
 services:  
@@ -1851,7 +1925,7 @@ services:
       - mosquitto
 ```
 
-도커 컴포즈 파일을 수정하고 컨테이너들을 실행합니다.
+도커 컴포즈 파일 수정 이후 컨테이너들을 실행합니다.
 ```
 docker-compose -f ~/docker-compose.yml up -d
 ```
@@ -1862,9 +1936,29 @@ docker ps
 ```
 
 
-컨테이너 실행 확인 이후 센서가 온도 데이터를 전송하는 시나리오를 연출해 보겠습니다. 다음과 같이 로컬 환경에서 온도 토픽을 발행합니다.
+### API URL 수정하기
+컨테이너 실행 확인 이후 센서가 온도 데이터를 전송하는 시나리오를 연출해 보겠습니다. 이전에 사용한 웹 프론트엔드(index.html)를 수정해야 합니다. 스크립트 태그 내부의 API_URL을 본인의 EC2 공개 IP로 수정합니다. 수정 이전 HTML 파일을 브라우저에서 실행 중이라면 창을 닫고 수정된 HTML 파일을 실행하거나 브라우저를 새로고침 합니다.
+index.html
 ```
-mosquitto_pub -t 
+...
+<script>
+  let fetchInterval;
+  // const API_URL = "http://localhost:3000";  
+  const API_URL = "http://123.123.123.123:3000";  
+...
 ```
 
-## .. 추가 작성 예정 
+다음과 같이 온도 토픽을 발행합니다. 호스트는 본인의 MQTT 브로커가 실행 중인 EC2 인스턴스의 공개 IP로 설정합니다. 토픽은 이전에 생성한 센서의 시리얼 번호가 포함됩니다. 메시지는 number 타입의 값을 전송하겠습니다. 만약 메시지를 큰따옴표 감싼 string 타입으로 전송한다면 MQTT 메시지 수신 컨트롤러에서 타입 캐스팅이 필요합니다. 온도 발행 이후 웹 프론트엔드에서 결과를 확인할 수 있습니다.
+```
+mosquitto_pub -h 123.123.123.123 -t temperature/1234 -m 22.2 
+```
+
+지금까지 진행한 내용을 정리하면 다음과 같습니다.
+1. 클라우드 서버의 백엔드 애플리케이션이 온도 토픽을 구독.
+2. MQTT 클라이언트에서 온도 토픽을 발행.
+3. 클라우드 서버의 MQTT 브로커가 온도 토픽을 구독자(백엔드)에게 전달.
+4. 백엔드에서 전달받은 토픽을 이용해 데이터베이스에 온도 저장.
+5. 프론트엔드에서 백엔드에게 저장된 온도 데이터를 요청.
+
+
+

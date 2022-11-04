@@ -4,16 +4,16 @@
     "type": "split",
     "children": [
       {
-        "id": "e7c61f8f349b1f2c",
+        "id": "241d49ea157b9e96",
         "type": "tabs",
         "children": [
           {
-            "id": "152c26443784a3e2",
+            "id": "d018802aeb726a09",
             "type": "leaf",
             "state": {
               "type": "markdown",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md",
+                "file": "ch3/hw-layer/2_iot_gateway_introduce.md",
                 "mode": "source",
                 "source": false
               }
@@ -71,8 +71,7 @@
       }
     ],
     "direction": "horizontal",
-    "width": 298.5,
-    "collapsed": true
+    "width": 298.5
   },
   "right": {
     "id": "f081b6795d3924bb",
@@ -88,7 +87,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md",
+                "file": "ch3/hw-layer/2_iot_gateway_introduce.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -105,7 +104,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md",
+                "file": "ch3/hw-layer/2_iot_gateway_introduce.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -128,7 +127,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "ch2/server-layer/8_monitoring_project_api.md"
+                "file": "ch3/hw-layer/2_iot_gateway_introduce.md"
               }
             }
           }
@@ -139,17 +138,17 @@
     "width": 300,
     "collapsed": true
   },
-  "active": "152c26443784a3e2",
+  "active": "d018802aeb726a09",
   "lastOpenFiles": [
-    "ch1/7_database_setup.md",
+    "ch3/hw-layer/3_iot_gateway_describe.md",
+    "ch3/hw-layer/2_iot_gateway_introduce.md",
+    "ch3/hw-layer/1_hw_layer.md",
     "ch2/server-layer/8_monitoring_project_api.md",
-    "ch1/6_broker_setup.md",
-    "ch1/5_docker_setup.md",
-    "ch1/4_aws_setup.md",
-    "ch1/3_mqtt_practice.md",
-    "ch2/server-layer/5_nestjs_setup.md",
-    "ch2/server-layer/4_nestjs_introduce.md",
-    "ch1/1_system_introduce.md",
-    "ch1/2_mqtt_introduce.md"
+    "ch1/7_database_setup.md",
+    "resources/ch2/8/frontend_example.png",
+    "nest_monitoring_newm.png.md",
+    "Pasted image 20220907135225.png",
+    "resources/ch2/8/스크린샷 2022-09-20 오후 1.47.08.png",
+    "resources/ch2/8/스크린샷 2022-10-11 오후 4.21.55.png"
   ]
 }
