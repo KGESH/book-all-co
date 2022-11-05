@@ -13,7 +13,7 @@
             "state": {
               "type": "markdown",
               "state": {
-                "file": "ch3/hw-layer/2_iot_gateway_introduce.md",
+                "file": "ch3/hw-layer/4_iot_gateway_implement.md",
                 "mode": "source",
                 "source": false
               }
@@ -71,7 +71,8 @@
       }
     ],
     "direction": "horizontal",
-    "width": 298.5
+    "width": 298.5,
+    "collapsed": true
   },
   "right": {
     "id": "f081b6795d3924bb",
@@ -87,7 +88,7 @@
             "state": {
               "type": "backlink",
               "state": {
-                "file": "ch3/hw-layer/2_iot_gateway_introduce.md",
+                "file": "ch3/hw-layer/4_iot_gateway_implement.md",
                 "collapseAll": false,
                 "extraContext": false,
                 "sortOrder": "alphabetical",
@@ -104,7 +105,7 @@
             "state": {
               "type": "outgoing-link",
               "state": {
-                "file": "ch3/hw-layer/2_iot_gateway_introduce.md",
+                "file": "ch3/hw-layer/4_iot_gateway_implement.md",
                 "linksCollapsed": false,
                 "unlinkedCollapsed": true
               }
@@ -127,7 +128,7 @@
             "state": {
               "type": "outline",
               "state": {
-                "file": "ch3/hw-layer/2_iot_gateway_introduce.md"
+                "file": "ch3/hw-layer/4_iot_gateway_implement.md"
               }
             }
           }
@@ -141,6 +142,7 @@
   "active": "d018802aeb726a09",
   "lastOpenFiles": [
     "ch3/hw-layer/3_iot_gateway_describe.md",
+    "ch3/hw-layer/4_iot_gateway_implement.md",
     "ch3/hw-layer/2_iot_gateway_introduce.md",
     "ch3/hw-layer/1_hw_layer.md",
     "ch2/server-layer/8_monitoring_project_api.md",
@@ -148,7 +150,6 @@
     "resources/ch2/8/frontend_example.png",
     "nest_monitoring_newm.png.md",
     "Pasted image 20220907135225.png",
-    "resources/ch2/8/스크린샷 2022-09-20 오후 1.47.08.png",
-    "resources/ch2/8/스크린샷 2022-10-11 오후 4.21.55.png"
+    "resources/ch2/8/스크린샷 2022-09-20 오후 1.47.08.png"
   ]
 }
