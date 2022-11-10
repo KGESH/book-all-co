@@ -141,15 +141,15 @@
   },
   "active": "d018802aeb726a09",
   "lastOpenFiles": [
-    "ch3/hw-layer/3_iot_gateway_describe.md",
+    "ch2/server-layer/8_monitoring_project_api.md",
+    "ch2/server-layer/7_hello_nestjs.md",
     "ch3/hw-layer/4_iot_gateway_implement.md",
+    "ch3/hw-layer/3_iot_gateway_describe.md",
     "ch3/hw-layer/2_iot_gateway_introduce.md",
     "ch3/hw-layer/1_hw_layer.md",
-    "ch2/server-layer/8_monitoring_project_api.md",
     "ch1/7_database_setup.md",
     "resources/ch2/8/frontend_example.png",
     "nest_monitoring_newm.png.md",
-    "Pasted image 20220907135225.png",
-    "resources/ch2/8/스크린샷 2022-09-20 오후 1.47.08.png"
+    "Pasted image 20220907135225.png"
   ]
 }

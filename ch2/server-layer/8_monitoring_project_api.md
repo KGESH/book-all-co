@@ -1485,8 +1485,8 @@ import { Observable } from 'rxjs';
 export class MqttService {  
   constructor(@Inject(MQTT_CLIENT) private readonly mqttClient: ClientProxy) {}  
   
-  send(topic: string, payload: unknown): Observable<unknown> {  
-    return this.mqttClient.send(topic, payload);  
+  emit(topic: string, payload: unknown): Observable<unknown> {  
+    return this.mqttClient.emit(topic, payload);  
   }  
 }
 ```
@@ -1594,7 +1594,7 @@ export class SensorsController {
     const { topic, command, target } = sendMqttDto;  
     const payload = Packet.generateRaw({ target, command });  
   
-    return this.mqttService.send(topic, payload);  
+    return this.mqttService.emit(topic, payload);  
   }  
 
   ...
