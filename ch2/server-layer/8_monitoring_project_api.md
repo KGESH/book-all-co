@@ -1,7 +1,7 @@
 # 온도 모니터링 시스템 API
 
 우리가 단계적으로 개발하려고 했던 시스템을 기억하시나요?
-우리 온도 모니터링 백엔드의 요구사항은 다음과 같습니다.
+온도 모니터링 백엔드의 요구사항은 다음과 같습니다.
 
 1. MQTT 토픽을 구독하여 MQTT 브로커를 통해 토픽을 전달받을 수 있습니다.
 2. 전달받은 토픽에서 토픽 발행자의 id와 온도 데이터를 얻어 데이터베이스에 저장할 수 있습니다.
@@ -11,7 +11,7 @@
 
 코딩을 시작하기 전에 먼저 우리가 만들고자 하는 API를 설계해봅시다. 프론트엔드 입장에선 백엔드에서 어떻게 온도 데이터를 수집하는지 알 필요가 없습니다. 물론 알 수도 없고요. 그저 백엔드에 온도 데이터가 있다고 믿고 데이터를 요청하는 행위만 할 뿐입니다. 우리는 프론트엔드에서 온도 데이터 요청에 필요한 인터페이스를 제공해야합니다. 
 
-온도 모니터링 시스템에서 프론트엔드에게 제공할 수 있는 기능을 다음과 같이 정의해봅시다.
+온도 모니터링 시스ㅗ템에서 프론트엔드에게 제공할 수 있는 기능을 다음과 같이 정의해봅시다.
 1. 온도 센서 등록
 2. 등록된 센서의 id로 가장 최근 온도 조회
 3. 등록된 센서의 id와 yyyy/MM/dd ~ yyyy/MM/dd 범위로 기간내의 온도 조회
@@ -1618,6 +1618,7 @@ async function bootstrap() {
   const app = await NestFactory.create(AppModule);  
   const configService = app.get<ConfigService>(ConfigService);  
 
+/** CORS 설정 */
   app.enableCors();
   app.connectMicroservice<MicroserviceOptions>({  
     transport: Transport.MQTT,  
