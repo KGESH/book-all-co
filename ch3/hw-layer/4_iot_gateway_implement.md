@@ -108,13 +108,116 @@ void callback(char* topic, byte* payload, unsigned int length) {
 JSON 형태의 페이로드 파싱 기능을 추가했습니다. 이제 디바이스에 업로드하고 스웨거에서 MQTT 토픽을 발행합니다. 데이터 파싱 결과를 시리얼 모니터로 확인합니다.
 #### .. 페이로드 파싱 결과 사진 추가 예정
 
-이전에 백엔드 애플리케이션을 작성할 때 컨트롤러에 설정한 온도 토픽을 기억하시나요? 우리가 설정한 온도 토픽은 다음과 같습니다.
+이전에 백엔드 애플리케이션을 작성할 때 컨트롤러에 설정한 온도 토픽을 기억하시나요? 임베디드 시스템이 주기적으로  데이터를 전달한다고 가정하고 온도 토픽을 발행하겠습니다. 우리가 설정한 온도 토픽은 다음과 같습니다. 
 ```
 temperature/시리얼번호
 ```
 
+이전에 백엔드에서 정의한 패킷 스키마를 기억하시나요? 우리가 정의한 패킷의 스키마는 다음과 같습니다.
+src/mqtt/packet.schema.ts
+```
+...
+interface PacketSchema {  
+  start: number;  
+  command: number;  
+  target: number;
+  data?: number;  
+  checksum: number;  
+  end: number;  
+}
+...
+```
+
+이를 토대로 임베디드 시스템과 주고 받을 프로토콜을 구조체로 정의합니다. 
+```
+...
+/* 프로토콜에서 사용할 시작과 끝 */
+const char START = 0x23;
+const char END = 0x0d;
+#pragma pack(push, 1)
+typedef struct EmbeddedPacket {
+	char start;
+	char command;
+	char target;
+	char data;
+	char checksum;
+	char end;
+} Packet;
+#pragma pack(pop)
+...
+
+```
+
+ 임베디드 시스템이 송신한 패킷을 수신하는 receivePacket 함수를 작성합니다. 
+```
+Packet receivePacket() {
+    while (Serial.available()) {
+        Packet packet;
+
+		/* 첫 바이트를 읽고 프로토콜의 시작인지 판단 */
+		packet.start = Serial.read()
+        if (packet.start != START) {
+	        /* 프로토콜과 다르면 수신 종료 */
+	        return;
+        }
+
+		/* 위에서 프로토콜의 시작 바이트를 수신했기 때문에 
+		   시작 바이트를 제외한 나머지 바이트를 수신  **/
+		char readBytes = board.readBytes(((char *) &packet + 1), sizeof(packet) - 1));
+		
+		if (!readBytes) {
+			/* Error handling */
+		}
+
+		return packet;
+    }
+}
+
+```
+
+패킷을 수신했으니 해당 패킷을 검증해야 합니다. 예제에서는 최대한 간단하게 start, command, target, data의 합을 체크섬으로 정하고 패킷을 검증하겠습니다. 다음과 같이 validChecksum 함수를 작성합니다.
+```
+boolean validChecksum(const Packet& packet) {
+	unsigned char checksum = 
+		packet.start + packet.command + packet.target + packet.data;
+
+	if (packet.checksum == checksum) {
+		return true;
+	}
+
+	return false;
+}
+```
+
+다음과 같이 임베디드 시스템의 패킷을 수신하는 함수를 작성합니다. 수신한 패킷을 검증하고 유효한 패킷이면 MQTT 브로커에 전송합니다. 결과적으로 해당 패킷은 백엔드 웹 애플리케이션에 전달됩니다.
+```
+void listeningBoard() {
+	Packet packet = receivePacket();
+	boolean isValid = validChecksum(packet);
+	
+	if (!isValid) {
+		return;
+	}
+
+	/** 발행할 토픽과 메시지를 작성합니다. 
+		메시지는 프로젝트의 상황에 따라 다양한 형태로 전송할 수 있습니다. */
+	client.publish(temperatureTopic, String(packet.data).c_str());
+}
+```
 
 
 
 
+ 다음과 같이 loop 함수 내에서 패킷 수신 대기합니다. 임베디드 시스템이 패킷을 전송하면 게이트웨이는 수신한 패킷을 MQTT 브로커에 전달하고, MQTT 브로커는 백엔드 웹 애플리케이션에 해당 패킷을 전달하게 됩니다.
+```
+void loop() {
 
+  ...
+
+  listeningBoard();
+
+
+  ...
+}
+
+```
